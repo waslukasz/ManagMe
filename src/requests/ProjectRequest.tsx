@@ -18,7 +18,7 @@ export function AddProject(name:string, description:string) {
     let data:Project = {
         id: crypto.randomUUID(),
         name: name,
-        decription: description
+        description: description
     }
     result.push(data);
     UpdateProjectsData(result);
@@ -26,17 +26,18 @@ export function AddProject(name:string, description:string) {
 
 export function DeleteProject(data:Project) {
     let result:Project[] = GetAllProjects();
-    result.slice(result.findIndex(p => p.id == data.id), 1);
+    result.splice(result.findIndex(p => p.id == data.id), 1);
     UpdateProjectsData(result);
 }
 
-export function UpdateProject(data:Project) {
+export function UpdateProject(data:Project):Project {
     let result:Project[] = GetAllProjects();
-    let project = result.find((p) => p.id == data.id);
+    let project:Project = result.find((p) => p.id == data.id)!;
     project!.name = data.name;
-    project!.decription = data.decription;
+    project!.description = data.description;
 
     UpdateProjectsData(result);
+    return project;
 }
 
 function UpdateProjectsData(data:Project[]) {

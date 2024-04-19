@@ -3,6 +3,7 @@ import Navigation from './components/Navigation'
 import Projects from './components/projects/Projects'
 
 import './index.css'
+import ProjectsCreate from './components/projects/Create'
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
         <Navigation/>
         <Routes>
           <Route path='/projects' element={<Projects/>} />
+          <Route path='/projects/create' element={<ProjectsCreate/>} />
         </Routes>
       </BrowserRouter>
     </>
