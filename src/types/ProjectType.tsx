@@ -3,3 +3,8 @@ export type Project = {
     name:string,
     description:string
 }
+
+export type ProjectDto = {
+    name:string,
+    description:string
+}

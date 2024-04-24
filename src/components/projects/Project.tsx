@@ -1,34 +1,43 @@
-import { Project as ProjectType} from "../../types/ProjectType";
-import { useRef, useState} from 'react'
+import { useRef, useState, useEffect } from 'react'
+import { Project as ProjectType } from "../../types/ProjectType";
+import ProjectApi from "../../api/ProjectApi";
+
 import AcceptIcon from '../../assets/accept.svg'
 import EditIcon from '../../assets/edit.svg'
 import DeleteIcon from '../../assets/delete.svg'
 import BackIcon from '../../assets/back.svg'
-import { UpdateProject, DeleteProject } from "../../requests/ProjectRequest";
+import SelectedIcon from '../../assets/selected.svg'
+import NotSelectedIcon from '../../assets/notselected.svg'
 
-export default function Project({data}: {data: ProjectType}) {
-  const [currentData, setCurrentData] = useState<ProjectType>(data);
+export default function Project({data, updateState, updateHandler}: {data: ProjectType, updateState:any, updateHandler:any}) {
+  const projectApi = new ProjectApi();
+  const [currentProject, setCurrentData] = useState<ProjectType>(data);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(false);
+  const [isActive, setIsActive] = useState<boolean>(projectApi.GetActiveId() == currentProject.id);
   const nameRef = useRef<HTMLInputElement>(null);
   const descRef = useRef<HTMLTextAreaElement>(null);
-
   const editStyle = {filter: 'invert(32%) sepia(72%) saturate(552%) hue-rotate(150deg) brightness(95%) contrast(85%)'};
   const deleteStyle = {filter: 'invert(24%) sepia(30%) saturate(5752%) hue-rotate(346deg) brightness(94%) contrast(84%)'};
   const acceptStyle = {filter: 'invert(33%) sepia(79%) saturate(618%) hue-rotate(78deg) brightness(105%) contrast(87%)'};
   const backStyle = {filter: 'invert(32%) sepia(72%) saturate(552%) hue-rotate(150deg) brightness(95%) contrast(85%)'};
+  const selectedStyle = {filter: 'invert(79%) sepia(34%) saturate(1323%) hue-rotate(329deg) brightness(104%) contrast(97%)'};
+
+  useEffect(() => {
+    setIsActive(projectApi.GetActiveId() == currentProject.id);
+  }, [updateState])
 
   async function editHandler() {
     setIsEditing((prevState) => !prevState);
     if (!isEditing) return;
 
     const updatedProject: ProjectType = {
-      id: currentData.id,
+      id: currentProject.id,
       name: nameRef.current!.value,
       description: descRef.current!.value
     }
 
-    setCurrentData(UpdateProject(updatedProject));
+    setCurrentData(await projectApi.Update(updatedProject));
   }
 
   async function cancelEditHandler() {
@@ -37,47 +46,61 @@ export default function Project({data}: {data: ProjectType}) {
   }
 
   async function deleteHandler() {
-    DeleteProject(currentData);
+    await projectApi.Delete(currentProject);
+    if (isActive) updateHandler();
     setIsDeleted(true);
+    updateHandler();
   }
 
-    return (
-      <>
-        {!isDeleted && 
-          <div className="inline-flex flex-col min-w-32 border border-solid p-2 rounded-sm">
-            <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
-              {!isEditing &&
-                <>
-                  <img className="h-5 cursor-pointer" style={editStyle} src={EditIcon} alt="Edit" onClick={editHandler} />
-                  <img className="h-5 cursor-pointer" style={deleteStyle} src={DeleteIcon} alt="Delete" onClick={deleteHandler}/>
-                </>
-              }
-              {isEditing &&
-                <>
-                  <img className="h-5 cursor-pointer" style={acceptStyle} src={AcceptIcon} alt="Accept" onClick={editHandler} />
-                  <img className="h-5 cursor-pointer" style={backStyle} src={BackIcon} alt="Cancel" onClick={cancelEditHandler} />
-                </>
-              }
-            </div>
-            <hr />
-            {!isEditing &&
-              <div className="flex flex-col">
-                <span className="text-xl font-bold">{currentData.name}</span>
-                <span className="mt-1">{currentData.description}</span>
-              </div>
+  async function selectHandler() {
+    projectApi.SetActive(currentProject);
+    updateHandler()
+  }
+
+  return (
+    <>
+      {!isDeleted && 
+        <div className="inline-flex flex-col min-w-32 border border-solid p-2 rounded-sm">
+          <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
+            {isActive && 
+              <img className="h-3 mr-auto self-start" style={selectedStyle} src={SelectedIcon} alt="Selected" />
             }
 
-            {isEditing && 
-              <div className="flex flex-col gap-0.5 mt-2">
-                <label htmlFor="name">Name</label>
-                <input className="border border-solid focus:outline-none p-0.5" type="text" defaultValue={currentData.name} ref={nameRef}/>
-                <br />
-                <label htmlFor="desc">Description</label>
-                <textarea className="border border-solid focus:outline-none p-0.5" name="desc" defaultValue={currentData.description} ref={descRef} />
-              </div>
+            {!isActive && 
+              <img className="h-3 cursor-pointer mr-auto self-start" onClick={selectHandler} style={selectedStyle} src={NotSelectedIcon} alt="Selected" />
+            }
+            {!isEditing &&
+              <>
+                <img className="h-5 cursor-pointer" style={editStyle} src={EditIcon} alt="Edit" onClick={editHandler} />
+                <img className="h-5 cursor-pointer" style={deleteStyle} src={DeleteIcon} alt="Delete" onClick={deleteHandler}/>
+              </>
+            }
+            {isEditing &&
+              <>
+                <img className="h-5 cursor-pointer" style={acceptStyle} src={AcceptIcon} alt="Accept" onClick={editHandler} />
+                <img className="h-5 cursor-pointer" style={backStyle} src={BackIcon} alt="Cancel" onClick={cancelEditHandler} />
+              </>
             }
           </div>
-        }
-      </>
-    )
-  }
+          <hr />
+          {!isEditing &&
+            <div className="flex flex-col">
+              <span className="text-xl font-bold">{currentProject.name}</span>
+              <span className="mt-1">{currentProject.description}</span>
+            </div>
+          }
+
+          {isEditing && 
+            <div className="flex flex-col gap-0.5 mt-2">
+              <label htmlFor="name">Name</label>
+              <input className="border border-solid focus:outline-none p-0.5" type="text" defaultValue={currentProject.name} ref={nameRef}/>
+              <br />
+              <label htmlFor="desc">Description</label>
+              <textarea className="border border-solid focus:outline-none p-0.5" name="desc" defaultValue={currentProject.description} ref={descRef} />
+            </div>
+          }
+        </div>
+      }
+    </>
+  )
+}
