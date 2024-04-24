@@ -27,7 +27,7 @@ export default class ProjectApi implements RepositoryApi<Project> {
     async Update(object:Project):Promise<Project> {
         let result = await this.GetById(object.id);
         result.name = object.name;
-        result.description = object.description
+        result.description = object.description;
         this.UpdateApi();
         return result;
     }

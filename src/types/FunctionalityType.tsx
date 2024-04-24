@@ -14,7 +14,6 @@ export type FunctionalityDto = {
     description:string,
     priority:PriorityType,
     project:string,
-    createdTimestamp: Date,
     status:StatusType,
     owner:string
 }

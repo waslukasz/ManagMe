@@ -33,7 +33,11 @@ export default class FunctionalityApi implements RepositoryApi<Functionality> {
     async Update(object:Functionality):Promise<Functionality> {
         let result = await this.GetById(object.id);
         result.name = object.name;
-        result.description = object.description
+        result.description = object.description;
+        result.priority = object.priority;
+        result.project = object.project;
+        result.owner = object.owner;
+        result.status = object.status;
         this.UpdateApi();
         return result;
     }
