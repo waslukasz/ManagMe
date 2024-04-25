@@ -6,6 +6,8 @@ import './index.css'
 import ProjectsCreate from './components/projects/CreateProject'
 import Functionalities from './components/functionalities/Functionalities'
 import CreateFunctionality from './components/functionalities/CreateFunctionality'
+import Tasks from './components/tasks/Tasks'
+import CreateTask from './components/tasks/CreateTask'
 
 function App() {
 
@@ -18,6 +20,8 @@ function App() {
           <Route path='/projects/create' element={<ProjectsCreate/>} />
           <Route path='/functionalities' element={<Functionalities/>} />
           <Route path='/functionalities/create' element={<CreateFunctionality/>} />
+          <Route path={'/tasks/:functionalityId'} element={<Tasks />} />
+          <Route path={'/tasks/create/:functionalityId'} element={<CreateTask />} />
         </Routes>
       </BrowserRouter>
     </>

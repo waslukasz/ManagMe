@@ -51,6 +51,7 @@ export default function Functionalities() {
             <><span className='text-xl font-bold mb-2'>Active Project</span>
             <FunctionalitiesActiveProject data={activeProject!}/></>}
         </div>
+        <span className='text-4xl mt-5 ml-3'>Functionalities</span>
         <div className='flex gap-5 mt-5 ml-3'>
           <span onClick={() => setSelectedStatus(-1)} className={selectedStatus == -1 && 'select-none text-white bg-blue-500 border-blue-500 px-5 py-1 font-mono text-xl border-2  border-solid rounded-3xl cursor-pointer hover:bg-blue-500 hover:text-white' || 'select-none text-blue-500 border-blue-500 px-5 py-1 font-mono text-xl border-2  border-solid rounded-3xl cursor-pointer hover:bg-blue-500 hover:text-white'}>ALL</span>
           <span onClick={() => setSelectedStatus(0)} className={selectedStatus == 0 && 'select-none text-white bg-red-500 border-red-500 px-5 py-1 font-mono text-xl border-2  border-solid rounded-3xl cursor-pointer hover:bg-red-500 hover:text-white' || 'select-none text-red-500 border-red-500 px-5 py-1 font-mono text-xl border-2  border-solid rounded-3xl cursor-pointer hover:bg-red-500 hover:text-white'}>TODO</span>

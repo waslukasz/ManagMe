@@ -4,6 +4,10 @@ export default class UserApi {
     DbName:string = 'users';
     DbSet:Array<User> = this.GetDbSet();
 
+    getUser():string {
+        return 'name'
+    }
+
     private GetDbSet() : Array<User> {
         let result:any = localStorage.getItem(this.DbName);
         if (result == null) {
