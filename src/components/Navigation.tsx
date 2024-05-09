@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react';
-import AuthApi from '../api/AuthApi';
 
 export default function Navigation() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [showLogin, setShowLogin] = useState<boolean>(false);
-  const authApi = new AuthApi();
 
   const handleShowLogin = (event:React.MouseEvent) => {
       event.preventDefault();
@@ -34,7 +32,6 @@ export default function Navigation() {
                         </div>
                     </div>
                 }
-                <span>[{authApi.getUser()}]</span>
             </div>
             }
         </div>

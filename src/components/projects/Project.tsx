@@ -30,11 +30,17 @@ export default function Project({data, updateState, updateHandler}: {data: Proje
   async function editHandler() {
     setIsEditing((prevState) => !prevState);
     if (!isEditing) return;
+    let newName:string = nameRef.current!.value;
+    let newDesc:string = descRef.current!.value;
+
+    if(newName == "") newName = currentProject.name;
+    if(newDesc == "") newDesc = currentProject.description;
+
 
     const updatedProject: ProjectType = {
       id: currentProject.id,
-      name: nameRef.current!.value,
-      description: descRef.current!.value
+      name: newName,
+      description: newDesc
     }
 
     setCurrentData(await projectApi.Update(updatedProject));
@@ -60,14 +66,14 @@ export default function Project({data, updateState, updateHandler}: {data: Proje
   return (
     <>
       {!isDeleted && 
-        <div className="inline-flex flex-col min-w-32 border border-solid p-2 rounded-sm">
-          <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
+        <div className={`inline-flex flex-col min-w-32 p-3 rounded-md font-sans shadow-md border border-solid ${!isActive && "border-gray-100" || "border-yellow-500"}`}>
+          <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2 select-none">
             {isActive && 
-              <img className="h-3 mr-auto self-start" style={selectedStyle} src={SelectedIcon} alt="Selected" />
+              <img className="h-4 mr-auto self-start" style={selectedStyle} src={SelectedIcon} alt="Selected" />
             }
 
             {!isActive && 
-              <img className="h-3 cursor-pointer mr-auto self-start" onClick={selectHandler} style={selectedStyle} src={NotSelectedIcon} alt="Selected" />
+              <img className="h-4 cursor-pointer mr-auto self-start select-none" onClick={selectHandler} style={selectedStyle} src={NotSelectedIcon} alt="Selected" />
             }
             {!isEditing &&
               <>
@@ -84,19 +90,19 @@ export default function Project({data, updateState, updateHandler}: {data: Proje
           </div>
           <hr />
           {!isEditing &&
-            <div className="flex flex-col">
+            <div className="flex flex-col pt-1">
               <span className="text-xl font-bold">{currentProject.name}</span>
-              <span className="mt-1">{currentProject.description}</span>
+              <span className="text-xs mt-1">{currentProject.description}</span>
             </div>
           }
 
           {isEditing && 
             <div className="flex flex-col gap-0.5 mt-2">
-              <label htmlFor="name">Name</label>
-              <input className="border border-solid focus:outline-none p-0.5" type="text" defaultValue={currentProject.name} ref={nameRef}/>
+              <label className='select-none text-sm font-bold'>Project name</label>
+              <input className="border border-solid focus:outline-none p-1 rounded" type="text" placeholder={currentProject.name} ref={nameRef}/>
               <br />
-              <label htmlFor="desc">Description</label>
-              <textarea className="border border-solid focus:outline-none p-0.5" name="desc" defaultValue={currentProject.description} ref={descRef} />
+              <label className='select-none text-sm font-bold'>Description</label>
+              <textarea className="border border-solid focus:outline-none p-1 rounded" name="desc" placeholder={currentProject.description} ref={descRef} />
             </div>
           }
         </div>

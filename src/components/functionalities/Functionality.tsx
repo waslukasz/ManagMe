@@ -33,14 +33,22 @@ export default function Functionality({data, updateState, updateHandler}: {data:
     setIsEditing((prevState) => !prevState);
     if (!isEditing) return;
 
+    let newName:string = nameRef.current!.value;
+    let newDesc:string = nameRef.current!.value;
+    let newPriority:number = parseInt(priorityRef.current!.value);
+    let newStatus:number = parseInt(statusRef.current!.value);
+    if(newName == "") newName = currentFunctionality.name;
+    if(newDesc == "") newDesc = currentFunctionality.description;
+
+
     const updatedFunctionality: FunctionalityType = {
       id: currentFunctionality.id,
-      name: nameRef.current!.value,
-      description: descRef.current!.value,
-      priority: parseInt(priorityRef.current!.value),
+      name: newName,
+      description: newDesc,
+      priority: newPriority,
       project: currentFunctionality.project,
       createdTimestamp: currentFunctionality.createdTimestamp,
-      status: parseInt(statusRef.current!.value),
+      status: newStatus,
       owner: currentFunctionality.owner
     }
 
@@ -62,7 +70,7 @@ export default function Functionality({data, updateState, updateHandler}: {data:
   return (
     <>
     {!isDeleted &&
-      <div className="inline-flex flex-col min-w-32 border border-solid p-2 rounded-sm">
+      <div className="inline-flex flex-col min-w-32 shadow border border-solid border-gray-100 p-3 rounded font-sans justify-between">
       <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
               {!isEditing &&
                 <>
@@ -80,34 +88,36 @@ export default function Functionality({data, updateState, updateHandler}: {data:
           <hr />
           {!isEditing &&
               <>
-              <div className="flex flex-col">
-                  <span className="text-xl font-bold">{currentFunctionality.name}</span>
-                  <span className="mt-1">{currentFunctionality.description}</span>
-                  <hr className='mt-3' />
-                  <span className='text-xs italic mt-1'>Priority: {currentFunctionality.priority == 0 && <>Low</>} {currentFunctionality.priority == 1 && <>Medium</>}{currentFunctionality.priority == 2 && <>High</>}</span>
-                  <span className='text-xs italic'>Status: {currentFunctionality.status == 0 && <>TODO</>} {currentFunctionality.status == 1 && <>Doing</>}{currentFunctionality.status == 2 && <>Done</>}</span>
-                  <span className='text-xs text-right italic my-1'>{formatDate(currentFunctionality.createdTimestamp, "hh:mm:ss - dd MMMM yyyy")}</span>
-                  <hr />
-                  <Link to={"/tasks/" + currentFunctionality.id} className='inline-flex self-center mt-2 hover:underline text-blue-400 cursor-pointer select-none'>Show tasks</Link>
+              <div className="flex flex-col flex-grow">
+                  <div className='flex flex-col flex-grow'>
+                    <span className="text-xl font-bold">{currentFunctionality.name}</span>
+                    <span className="text-sm mt-1">{currentFunctionality.description}</span>
+                  </div>
+                  <hr className='my-2' />
+                  <div className='flex flex-col'>
+                    <span className='text-xs text-right italic mt-1'>Priority: {currentFunctionality.priority == 0 && <>Low</>} {currentFunctionality.priority == 1 && <>Medium</>}{currentFunctionality.priority == 2 && <>High</>}</span>
+                    <span className='text-xs text-right italic'>Status: {currentFunctionality.status == 0 && <>TODO</>} {currentFunctionality.status == 1 && <>Doing</>}{currentFunctionality.status == 2 && <>Done</>}</span>
+                    <span className='text-xs text-right italic'>{formatDate(currentFunctionality.createdTimestamp, "hh:mm:ss - dd MMMM yyyy")}</span>
+                    <Link to={"/tasks/" + currentFunctionality.id} className='inline-flex self-end text-sm hover:underline text-blue-400 cursor-pointer select-none'>Show tasks</Link>
+                  </div>
               </div>
               </>
           }
           {isEditing && 
               <>
-                  <div className="flex flex-col gap-0.5 mt-2">
-                      <label htmlFor="name">Name</label>
-                      <input className="border border-solid focus:outline-none p-0.5" type="text" defaultValue={currentFunctionality.name} ref={nameRef}/>
-                      <br />
-                      <label htmlFor="desc">Description</label>
-                      <textarea className="border border-solid focus:outline-none p-0.5" name="desc" defaultValue={currentFunctionality.description} ref={descRef} />
-                      <label htmlFor="priority">Priority</label>
-                      <select ref={priorityRef} defaultValue={currentFunctionality.priority} name="priority" className="rounded-sm border border-solid border-black">
+                  <div className="flex flex-col mt-2">
+                      <label className='text-sm font-bold'>Functionality name</label>
+                      <input className="border border-solid focus:outline-none p-1 rounded" type="text" placeholder={currentFunctionality.name} ref={nameRef}/>
+                      <label className='text-sm font-bold mt-2'>Description</label>
+                      <textarea className="border border-solid focus:outline-none p-1 rounded" name="desc" placeholder={currentFunctionality.description} ref={descRef} />
+                      <label className='text-sm font-bold mt-2'>Priority</label>
+                      <select ref={priorityRef} defaultValue={currentFunctionality.priority} className="rounded border border-solid border-black">
                           <option value="0">Low</option>
                           <option value="1">Medium</option>
                           <option value="2">High</option>
                       </select>
-                      <label htmlFor="status">Status:</label>
-                      <select ref={statusRef} defaultValue={currentFunctionality.status} name="status" className="rounded-sm border border-solid border-black">
+                      <label className='text-sm font-bold mt-2'>Status:</label>
+                      <select ref={statusRef} defaultValue={currentFunctionality.status} name="status" className="rounded border border-solid border-black">
                           <option value="0">TODO</option>
                           <option value="1">Doing</option>
                           <option value="2">Done</option>

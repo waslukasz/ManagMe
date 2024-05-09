@@ -30,17 +30,17 @@ export default function ProjectsCreate() {
             <Link to={"/projects"} className='p-2 hover:bg-red-700 transition-colors'>Go back to projects</Link>
             <Link to={"/functionalities"} className='p-2 hover:bg-red-700 transition-colors'>Go back to functionalities</Link>
           </div>
-          <div className="flex justify-center mt-7">
-            <form className="inline-flex flex-col gap-2">
-                <label htmlFor="name">
-                    Task name:
+          <div className="flex justify-center mt-7 font-sans">
+            <form className="inline-flex flex-col gap-1">
+                <label className='font-bold'>
+                    Task name
                 </label>
-                <input ref={nameRef} className="rounded-sm border border-solid p-1 border-black" type="text" name="name"/>
-                <label htmlFor="desc">Description</label>
-                <textarea ref={descRef} className="rounded-sm border border-solid border-black" name="desc" id="" cols={30} rows={5}></textarea>
-                <label htmlFor="estDate">Estimated finish date</label>
-                <input ref={estDateRef} type="date" name="estDate"/>
-                <button onClick={handleSubmit} className="text-green-600 border-solid border border-green-600 p-2 rounded-md font-mono font-bold hover:bg-green-600 hover:text-white transition-colors">Create</button>
+                <input ref={nameRef} className="rounded border border-solid p-2 border-black" type="text" name="name"/>
+                <label className='font-bold mt-2'>Description</label>
+                <textarea ref={descRef} className="rounded border border-solid p-2 border-black" name="desc" id="" cols={30} rows={5}></textarea>
+                <label className='font-bold mt-2'>Estimated finish date</label>
+                <input ref={estDateRef} type="date" name="estDate" className="rounded border border-solid p-2 border-black"/>
+                <button onClick={handleSubmit} className="text-green-600 border-solid border border-green-600 mt-2 p-2 rounded-md font-mono font-bold hover:bg-green-600 hover:text-white transition-colors">Create</button>
             </form>
         </div>
         </div>

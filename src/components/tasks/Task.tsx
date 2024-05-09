@@ -35,16 +35,23 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
     setIsEditing((prevState) => !prevState);
     if (!isEditing) return;
 
+    let newName:string = nameRef.current!.value;
+    let newDesc:string = descRef.current!.value;
+    let newEstDate:Date = estDateRef.current!.valueAsDate!;
+    if (newName == "") newName = currentTask.name;
+    if (newDesc == "") newDesc = currentTask.description;
+    if (currentTask.status == StatusType.DONE) newEstDate = currentTask.estimatedTime;
+
     const updatedTask: TaskType = {
       id: currentTask.id,
-      name: nameRef.current!.value,
-      description: descRef.current!.value,
+      name: newName,
+      description: newDesc,
       functionalityId: currentTask.functionalityId,
       status: currentTask.status,
       createdTimestamp: currentTask.createdTimestamp,
       startTime: currentTask.startTime,
       endTime: currentTask.endTime,
-      estimatedTime: estDateRef.current!.valueAsDate!,
+      estimatedTime: newEstDate,
       assignedUserId: currentTask.assignedUserId
     }
 
@@ -94,7 +101,7 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
   return (
     <>
       {!isDeleted && 
-        <div className="inline-flex flex-col min-w-32 border border-solid p-2 rounded-sm">
+        <div className="inline-flex flex-col min-w-32 border border-solid border-gray-200 p-2 rounded shadow font-sans">
         <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
                 {!isEditing && !isProceeding &&
                   <>
@@ -122,12 +129,13 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
               <>
                 <div>
                   <div className="flex flex-col gap-0.5 mt-2">
-                    <label htmlFor="assignUser">Assign user</label>
-                    <select ref={assignedUserRef} name="assignUser" className="border border-solid focus:outline-none p-0.5">
+                    <label className='font-bold text-sm'>Assign user</label>
+                    <select ref={assignedUserRef} className="border border-solid rounded focus:outline-none p-0.5">
                       <option value="User1">User1</option>
                       <option value="User2">User2</option>
                       <option value="User3">User3</option>
                     </select>
+                    <span className='mt-2 text-right text-xs italic text-gray-400'>By assigning user you will change task status to "Doing".</span>
                   </div>
                 </div>
                 <hr className='mt-3' />
@@ -135,9 +143,9 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
             }
             {isProceeding && currentTask.assignedUserId != null &&
               <>
-              <div className='mt-2'>
-                Click accept button to mark this task as done. <br />
-                If you don't want to proceed, please click the back button.
+              <div className='mt-2 flex flex-col gap-1 text-sm'>
+                <span>Click accept button to mark this task as done.</span>
+                <span>If you don't want to proceed, please click the back button.</span>
               </div>
               <hr className='mt-3' />
             </>
@@ -160,13 +168,16 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
             {isEditing && 
                 <>
                     <div className="flex flex-col gap-0.5 mt-2">
-                        <label htmlFor="name">Name</label>
-                        <input className="border border-solid focus:outline-none p-0.5" type="text" defaultValue={currentTask.name} ref={nameRef}/>
+                        <label className='text-sm font-bold'>Name</label>
+                        <input className="border border-solid focus:outline-none p-1 rounded" type="text" defaultValue={currentTask.name} ref={nameRef}/>
                         <br />
-                        <label htmlFor="desc">Description</label>
-                        <textarea className="border border-solid focus:outline-none p-0.5" name="desc" defaultValue={currentTask.description} ref={descRef} />
-                        <label className='mt-4' htmlFor="estDate">Estimated finish date</label>
-                        <input className='border border-solid focus:outline-none p-0.5' ref={estDateRef} type="date" name="estDate"/>
+                        <label className='text-sm font-bold'>Description</label>
+                        <textarea className="border border-solid focus:outline-none p-1 rounded" name="desc" defaultValue={currentTask.description} ref={descRef} />
+                        {currentTask.status != StatusType.DONE && <>
+                        <br />
+                        <label className='text-sm font-bold'>Estimated finish date</label>
+                        <input className="border border-solid focus:outline-none p-1 rounded" ref={estDateRef} type="date" name="estDate"/>
+                        </>}
                     </div>
                 </>
             }

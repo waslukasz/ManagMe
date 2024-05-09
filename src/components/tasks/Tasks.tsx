@@ -44,19 +44,19 @@ export default function Tasks() {
         <span className='text-4xl mt-5 ml-3'>Tasks</span>
         {isFetching && <p className='text-center text-2xl tracking-wider'>Loading content...</p>}
         { !isFetching && isUpdated &&
-          <div className='grid grid-cols-3 gap-3 m-3'>
-            <div className='grid grid-cols-1 auto-rows-min gap-3'>
-              <div className='text-2xl text-center'>TODO</div>
+          <div className='grid grid-cols-3 gap-3 m-3 font-mono'>
+            <div className='grid grid-cols-1 auto-rows-min gap-3 font-sans'>
+              <div className='text-2xl text-center font-bold tracking-wider'>TODO</div>
               {tasks.map((task) => task.functionalityId == functionalityId && task.status == StatusType.TODO && <Task key={task.id} data={task} updateState={isUpdated} updateHandler={updateHandler} />) || <p>No tasks to display...</p>}
             </div>
 
-            <div className='grid grid-cols-1 auto-rows-min gap-3'>
-              <div className='text-2xl text-center'>Doing</div>
+            <div className='grid grid-cols-1 auto-rows-min gap-3 font-sans'>
+              <div className='text-2xl text-center font-bold tracking-wider'>Doing</div>
               {tasks.map((task) => task.functionalityId == functionalityId && task.status == StatusType.DOING && <Task key={task.id} data={task} updateState={isUpdated} updateHandler={updateHandler} />) || <p>No tasks to display...</p>}
             </div>
 
-            <div className='grid grid-cols-1 auto-rows-min gap-3'>
-              <div className='text-2xl text-center'>Done</div>
+            <div className='grid grid-cols-1 auto-rows-min gap-3 font-sans'>
+              <div className='text-2xl text-center font-bold tracking-wider'>Done</div>
               {tasks.map((task) => task.functionalityId == functionalityId && task.status == StatusType.DONE && <Task key={task.id} data={task} updateState={isUpdated} updateHandler={updateHandler} />) || <p>No tasks to display...</p>}
             </div>
           </div>
