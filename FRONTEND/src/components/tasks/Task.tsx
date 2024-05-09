@@ -7,6 +7,8 @@ import Continue from '../../assets/continue.svg'
 import TaskApi from '../../api/TaskApi';
 import { StatusType, Task as TaskType } from '../../types/TaskType';
 import { format as formatDate } from 'date-fns'
+import { User as UserType } from '../../types/UserType'
+import AuthApi from '../../api/AuthApi'
 
 export default function Task({data, updateState, updateHandler}: {data: TaskType, updateState:any, updateHandler:any}) {
   const taskApi = new TaskApi;
@@ -14,6 +16,10 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(false);
+
+  const authApi = new AuthApi;
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const editStyle = {filter: 'invert(32%) sepia(72%) saturate(552%) hue-rotate(150deg) brightness(95%) contrast(85%)'};
   const deleteStyle = {filter: 'invert(24%) sepia(30%) saturate(5752%) hue-rotate(346deg) brightness(94%) contrast(84%)'};
@@ -30,6 +36,19 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
   useEffect(() => {
 
   }, [updateState])
+
+  useEffect(() => {
+    fetchAllUsernames();
+  }, [])
+
+  async function fetchAllUsernames() {
+    setIsFetching(true);
+    try {
+        let users = (await authApi.GetAll());
+        setUsers(users);
+    } catch (error) {}
+    setIsFetching(false);
+  }
 
   async function editHandler() {
     setIsEditing((prevState) => !prevState);
@@ -131,9 +150,7 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
                   <div className="flex flex-col gap-0.5 mt-2">
                     <label className='font-bold text-sm'>Assign user</label>
                     <select ref={assignedUserRef} className="border border-solid rounded focus:outline-none p-0.5">
-                      <option value="User1">User1</option>
-                      <option value="User2">User2</option>
-                      <option value="User3">User3</option>
+                      {users.map(user => <option key={user.id} value={user.id}>{user.username}</option>)}
                     </select>
                     <span className='mt-2 text-right text-xs italic text-gray-400'>By assigning user you will change task status to "Doing".</span>
                   </div>
@@ -160,7 +177,7 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
                     <span className='text-xs italic'>Started: { currentTask.startTime ? formatDate(currentTask.startTime, "dd/MM/yyyy") : '-'}</span>
                     <span className='text-xs italic'>Finished: { currentTask.endTime ? formatDate(currentTask.endTime, "dd/MM/yyyy") : '-'}</span>
                     {currentTask.endTime == null && <span className='text-xs italic'>Estimated finish time:  {currentTask.estimatedTime ? formatDate(currentTask.estimatedTime, "dd/MM/yyyy") : '-'}</span>}
-                    <span className='text-xs italic'>Assigned user: {currentTask.assignedUserId ? 'current user name' : 'not assigned'}</span>
+                    <span className='text-xs italic'>Assigned user: {updateState && currentTask.assignedUserId ? users.find(u => u.id == currentTask.assignedUserId)?.username : 'not assigned'}</span>
                     <span className='text-xs text-right italic'>{formatDate(currentTask.createdTimestamp, "hh:mm:ss - dd MMMM yyyy")}</span>
                 </div>
                 </>

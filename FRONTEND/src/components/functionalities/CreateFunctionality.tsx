@@ -14,6 +14,7 @@ export default function ProjectsCreate() {
   
   const handleSubmit = (event:React.MouseEvent) => {
     event.preventDefault()
+    
     const newFunctionality: FunctionalityDto = {
         name: nameRef.current!.value,
         description: descRef.current!.value,
