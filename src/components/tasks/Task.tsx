@@ -6,12 +6,10 @@ import BackIcon from '../../assets/back.svg'
 import Continue from '../../assets/continue.svg'
 import TaskApi from '../../api/TaskApi';
 import { StatusType, Task as TaskType } from '../../types/TaskType';
-import UserApi from '../../api/UserApi';
 import { format as formatDate } from 'date-fns'
 
 export default function Task({data, updateState, updateHandler}: {data: TaskType, updateState:any, updateHandler:any}) {
   const taskApi = new TaskApi;
-  const userApi = new UserApi;
   const [currentTask, setCurrentTask] = useState<TaskType>(data);
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -167,9 +165,8 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
                         <br />
                         <label htmlFor="desc">Description</label>
                         <textarea className="border border-solid focus:outline-none p-0.5" name="desc" defaultValue={currentTask.description} ref={descRef} />
-                        <label htmlFor="priority">Priority</label>
-                        <label htmlFor="estDate">Estimated finish date</label>
-                        <input ref={estDateRef} type="date" name="estDate"/>
+                        <label className='mt-4' htmlFor="estDate">Estimated finish date</label>
+                        <input className='border border-solid focus:outline-none p-0.5' ref={estDateRef} type="date" name="estDate"/>
                     </div>
                 </>
             }
