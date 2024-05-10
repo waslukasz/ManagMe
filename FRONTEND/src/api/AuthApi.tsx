@@ -13,6 +13,10 @@ export default class AuthApi {
         return await getToken();
     }
 
+    async RefreshToken(refreshToken:string): Promise<{token:string, refreshToken:string}> {
+        return await getRefreshedToken(refreshToken);;
+    }
+
     private GetByUsername(username: string): User | undefined {
         return this.DbSet.find(p => p.username == username);
     }
@@ -72,6 +76,19 @@ async function getToken() : Promise<{token:string, refreshToken:string}> {
             "Content-type": "application/json; charset=UTF-8",
             "exp": "6000"
         }
+    })
+    if(!response.ok) throw new Error('Failed to fetch token.');
+    return await response.json();
+}
+
+async function getRefreshedToken(refreshToken:string) : Promise<{token:string, refreshToken:string}> {
+    const response = await fetch(`${URL}/refreshtoken`, {
+        method: 'POST',
+        headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            "exp": "6000"
+        },
+        body: JSON.stringify({ refreshToken: refreshToken})
     })
     if(!response.ok) throw new Error('Failed to fetch token.');
     return await response.json();

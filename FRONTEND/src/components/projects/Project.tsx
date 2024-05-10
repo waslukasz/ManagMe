@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Project as ProjectType } from "../../types/ProjectType";
 import ProjectApi from "../../api/ProjectApi";
 
@@ -11,12 +11,13 @@ import NotSelectedIcon from '../../assets/notselected.svg'
 
 export default function Project({data, updateState, updateHandler}: {data: ProjectType, updateState:any, updateHandler:any}) {
   const projectApi = new ProjectApi();
-  const [currentProject, setCurrentData] = useState<ProjectType>(data);
+  const [currentProject, setCurrentProject] = useState<ProjectType>(data);
+  const [projectData, setProjectData] = useState<ProjectType>(currentProject);
+
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(false);
   const [isActive, setIsActive] = useState<boolean>(projectApi.GetActiveId() == currentProject.id);
-  const nameRef = useRef<HTMLInputElement>(null);
-  const descRef = useRef<HTMLTextAreaElement>(null);
+
   const editStyle = {filter: 'invert(32%) sepia(72%) saturate(552%) hue-rotate(150deg) brightness(95%) contrast(85%)'};
   const deleteStyle = {filter: 'invert(24%) sepia(30%) saturate(5752%) hue-rotate(346deg) brightness(94%) contrast(84%)'};
   const acceptStyle = {filter: 'invert(33%) sepia(79%) saturate(618%) hue-rotate(78deg) brightness(105%) contrast(87%)'};
@@ -28,25 +29,14 @@ export default function Project({data, updateState, updateHandler}: {data: Proje
   }, [updateState])
 
   async function editHandler() {
+    if(projectData.name == '') return;
     setIsEditing((prevState) => !prevState);
     if (!isEditing) return;
-    let newName:string = nameRef.current!.value;
-    let newDesc:string = descRef.current!.value;
-
-    if(newName == "") newName = currentProject.name;
-    if(newDesc == "") newDesc = currentProject.description;
-
-
-    const updatedProject: ProjectType = {
-      id: currentProject.id,
-      name: newName,
-      description: newDesc
-    }
-
-    setCurrentData(await projectApi.Update(updatedProject));
+    setCurrentProject(await projectApi.Update(projectData));
   }
 
   async function cancelEditHandler() {
+    setProjectData(currentProject);
     setIsEditing((prevState) => !prevState);
     return;
   }
@@ -75,12 +65,14 @@ export default function Project({data, updateState, updateHandler}: {data: Proje
             {!isActive && 
               <img className="h-4 cursor-pointer mr-auto self-start select-none" onClick={selectHandler} style={selectedStyle} src={NotSelectedIcon} alt="Selected" />
             }
+
             {!isEditing &&
               <>
                 <img className="h-5 cursor-pointer" style={editStyle} src={EditIcon} alt="Edit" onClick={editHandler} />
                 <img className="h-5 cursor-pointer" style={deleteStyle} src={DeleteIcon} alt="Delete" onClick={deleteHandler}/>
               </>
             }
+
             {isEditing &&
               <>
                 <img className="h-5 cursor-pointer" style={acceptStyle} src={AcceptIcon} alt="Accept" onClick={editHandler} />
@@ -99,10 +91,10 @@ export default function Project({data, updateState, updateHandler}: {data: Proje
           {isEditing && 
             <div className="flex flex-col gap-0.5 mt-2">
               <label className='select-none text-sm font-bold'>Project name</label>
-              <input className="border border-solid focus:outline-none p-1 rounded" type="text" placeholder={currentProject.name} ref={nameRef}/>
+              <input value={projectData.name} onChange={(event) => setProjectData({...projectData, name: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" type="text"/>
               <br />
               <label className='select-none text-sm font-bold'>Description</label>
-              <textarea className="border border-solid focus:outline-none p-1 rounded" name="desc" placeholder={currentProject.description} ref={descRef} />
+              <textarea value={projectData.description} onChange={(event) => setProjectData({...projectData, description: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" />
             </div>
           }
         </div>

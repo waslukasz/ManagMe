@@ -3,7 +3,7 @@ import { Project as ProjectType } from "../../types/ProjectType";
 import SelectedIcon from '../../assets/selected.svg'
 
 export default function FunctionalitiesActiveProject({data}: {data: ProjectType}) {
-  const [currentProject, setCurrentData] = useState<ProjectType>(data);
+  const [currentProject, setCurrentProject] = useState<ProjectType>(data);
   const selectedStyle = {filter: 'invert(79%) sepia(34%) saturate(1323%) hue-rotate(329deg) brightness(104%) contrast(97%)'};
 
   return (
