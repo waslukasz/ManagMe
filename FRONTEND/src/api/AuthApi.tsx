@@ -1,25 +1,58 @@
-import { Role, User } from "../types/UserType";
+import { useContext } from "react";
+import { Role, User, UserProfile } from "../types/UserType";
+import AuthContext from "../contexts/AuthProvider";
 
 const URL: string = "http://localhost:3000";
+
+export type AuthType = {
+  user: UserProfile;
+  token: string;
+  refreshToken: string;
+};
 
 export default class AuthApi {
   DbName: string = "users";
   DbSet: Array<User> = this.GetDbSet();
+  authContext = useContext(AuthContext);
 
-  async SignIn(
-    username: string,
-    password: string
-  ): Promise<{ token: string; refreshToken: string } | null> {
+  async SignIn(username: string, password: string): Promise<AuthType | null> {
     const user = this.GetByUsername(username);
-    if (user == undefined) return null;
-    if (user.password != password) return null;
-    return await getToken();
+    if (user == undefined || user.password != password) return null;
+    const tokens: { token: string; refreshToken: string } = await getToken();
+
+    const result: AuthType = {
+      user: {
+        id: user.id,
+        name: user.name,
+        roles: user.roles,
+        surname: user.surname,
+        username: user.username,
+      },
+      token: tokens.token,
+      refreshToken: tokens.refreshToken,
+    };
+
+    localStorage.setItem("_auth", JSON.stringify(result));
+    return result;
   }
 
-  async RefreshToken(
-    refreshToken: string
-  ): Promise<{ token: string; refreshToken: string }> {
-    return await getRefreshedToken(refreshToken);
+  async SignOut(): Promise<void> {
+    localStorage.removeItem("_auth");
+  }
+
+  async RefreshToken(refreshToken: string) {
+    let auth = await this.GetCurrentAuth();
+    const newTokens = await getRefreshedToken(refreshToken);
+    auth = {
+      ...auth,
+      token: newTokens.token,
+      refreshToken: newTokens.refreshToken,
+    };
+    localStorage.setItem("_auth", JSON.stringify(auth));
+  }
+
+  async GetCurrentAuth(): Promise<AuthType> {
+    return JSON.parse("_auth") as AuthType;
   }
 
   private GetByUsername(username: string): User | undefined {
@@ -52,7 +85,7 @@ export default class AuthApi {
       surname: "Doe",
       roles: [Role.DevOps],
       username: "pauld",
-      password: "Devops123",
+      password: "Admin123",
     };
 
     let developer: User = {
@@ -61,7 +94,7 @@ export default class AuthApi {
       surname: "Nowak",
       roles: [Role.Developer],
       username: "adamn",
-      password: "Developer123",
+      password: "Admin123",
     };
 
     users.push(admin, devops, developer);
