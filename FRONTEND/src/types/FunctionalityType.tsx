@@ -1,7 +1,7 @@
 export type Functionality = {
     id:string,
     name:string,
-    description:string,
+    description:string|null,
     priority:PriorityType,
     project:string,
     createdTimestamp:Date,
@@ -11,7 +11,7 @@ export type Functionality = {
 
 export type FunctionalityDto = {
     name:string,
-    description:string,
+    description:string|null,
     priority:PriorityType,
     project:string,
     status:StatusType,

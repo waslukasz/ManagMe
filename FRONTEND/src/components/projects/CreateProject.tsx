@@ -39,7 +39,7 @@ export default function ProjectsCreate() {
             }
 
             <label className='font-bold mt-3'>Description</label>
-            <textarea value={projectData.description} onChange={(event) => setProjectData({...projectData, description: event.target.value})} className="rounded border border-solid p-2 border-black" cols={30} rows={5}></textarea>
+            <textarea value={projectData.description ?? ''} onChange={(event) => setProjectData({...projectData, description: event.target.value})} className="rounded border border-solid p-2 border-black" cols={30} rows={5}></textarea>
             
             <button onClick={handleSubmit} className="text-green-600 border-solid border border-green-600 p-2 mt-3 rounded font-mono font-bold hover:bg-green-600 hover:text-white transition-colors">Create</button>
           </form>

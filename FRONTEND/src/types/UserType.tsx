@@ -2,7 +2,7 @@ export type User = {
     id:string,
     name:string,
     surname:string,
-    role:Role,
+    roles:Array<Role>,
     username:string,
     password:string
 }

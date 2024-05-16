@@ -8,7 +8,7 @@ export default function ProjectsCreate() {
   const { functionalityId } = useParams();
   
   const taskApi = new TaskApi();
-  const [taskData, setTaskData] = useState({ name: '', description: '', estDate: addDays(new Date(), 7)});
+  const [taskData, setTaskData] = useState<TaskDto>({ name: '', description: '', functionalityId: functionalityId!, estimatedTime: addDays(new Date(), 7)});
   const [createFailed, setCreateFailed] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function ProjectsCreate() {
         name: taskData.name,
         description: taskData.description,
         functionalityId: functionalityId!,
-        estimatedTime: taskData.estDate,
+        estimatedTime: taskData.estimatedTime,
     }
 
     taskApi.Add(newTask);
@@ -50,10 +50,10 @@ export default function ProjectsCreate() {
             }
 
             <label className='font-bold mt-2'>Description</label>
-            <textarea required value={taskData.description} onChange={(event) => setTaskData({...taskData, description: event.target.value})} className="rounded border border-solid p-2 border-black" name="desc" id="" cols={30} rows={5}></textarea>
+            <textarea required value={taskData.description ?? ''} onChange={(event) => setTaskData({...taskData, description: event.target.value})} className="rounded border border-solid p-2 border-black" name="desc" id="" cols={30} rows={5}></textarea>
 
             <label className='font-bold mt-2'>Estimated finish date</label>
-            <input value={formatDate(taskData.estDate, "yyyy-MM-dd")} onChange={(event) => isDateValid(new Date(event.target.value)) ? setTaskData({...taskData, estDate: new Date(event.target.value)}) : null } type="date" name="estDate" className="rounded border border-solid p-2 border-black"/>
+            <input value={formatDate(taskData.estimatedTime ?? '', "yyyy-MM-dd")} onChange={(event) => isDateValid(new Date(event.target.value)) ? setTaskData({...taskData, estimatedTime: new Date(event.target.value)}) : null } type="date" name="estDate" className="rounded border border-solid p-2 border-black"/>
 
             <button onClick={handleSubmit} className="text-green-600 border-solid border border-green-600 mt-2 p-2 rounded-md font-mono font-bold hover:bg-green-600 hover:text-white transition-colors">Create</button>
           </form>

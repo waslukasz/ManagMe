@@ -94,7 +94,7 @@ export default function Functionality({data, updateState, updateHandler}: {data:
                 <input value={functionalityData.name} onChange={(event) => setFunctionalityData({...functionalityData, name: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" type="text"/>
                 
                 <label className='text-sm font-bold mt-2'>Description</label>
-                <textarea value={functionalityData.description} onChange={(event) => setFunctionalityData({...functionalityData, description: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" />
+                <textarea value={functionalityData.description ?? ''} onChange={(event) => setFunctionalityData({...functionalityData, description: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" />
                 
                 <label className='text-sm font-bold mt-2'>Priority</label>
                 <select ref={priorityRef} defaultValue={currentFunctionality.priority} className="rounded border border-solid border-black">

@@ -40,7 +40,7 @@ export default function ProjectsCreate() {
             }
 
             <label className='font-bold mt-2'>Description</label>
-            <textarea value={functionalityData.description} onChange={(event) => setFunctionalityData({...functionalityData, description: event.target.value})} className="rounded border border-solid p-2 border-black" cols={30} rows={5}></textarea>
+            <textarea value={functionalityData.description ?? ''} onChange={(event) => setFunctionalityData({...functionalityData, description: event.target.value})} className="rounded border border-solid p-2 border-black" cols={30} rows={5}></textarea>
             
             <label className='font-bold mt-2'>Priority</label>
             <select ref={priorityRef} defaultValue={PriorityType.LOW} name='priority' className="rounded border border-solid p-2 border-black">

@@ -168,7 +168,7 @@ export default function Task({data, updateState, updateHandler}: {data: TaskType
               <input value={taskData.name} onChange={(event) => setTaskData({...taskData, name: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" type="text"/>
               <br />
               <label className='text-sm font-bold'>Description</label>
-              <textarea value={taskData.description} onChange={(event) => setTaskData({...taskData, description: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" />
+              <textarea value={taskData.description ?? ''} onChange={(event) => setTaskData({...taskData, description: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" />
               {currentTask.status != StatusType.DONE &&
                 <>
                   <br />

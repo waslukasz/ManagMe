@@ -94,7 +94,7 @@ export default function Project({data, updateState, updateHandler}: {data: Proje
               <input value={projectData.name} onChange={(event) => setProjectData({...projectData, name: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" type="text"/>
               <br />
               <label className='select-none text-sm font-bold'>Description</label>
-              <textarea value={projectData.description} onChange={(event) => setProjectData({...projectData, description: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" />
+              <textarea value={projectData.description ?? ''} onChange={(event) => setProjectData({...projectData, description: event.target.value})} className="border border-solid focus:outline-none p-1 rounded" />
             </div>
           }
         </div>

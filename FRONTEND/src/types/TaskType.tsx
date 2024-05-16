@@ -1,21 +1,21 @@
 export type Task = {
     id:string,
     name:string,
-    description:string,
+    description:string|null,
     functionalityId:string
     status:StatusType,
     createdTimestamp:Date,
     startTime: Date|null,
     endTime: Date|null,
-    estimatedTime: Date,
+    estimatedTime: Date|null,
     assignedUserId:string|null
 }
 
 export type TaskDto = {
     name:string,
-    description:string,
+    description:string|null,
     functionalityId:string
-    estimatedTime: Date,
+    estimatedTime: Date|null,
 }
 
 export enum StatusType {

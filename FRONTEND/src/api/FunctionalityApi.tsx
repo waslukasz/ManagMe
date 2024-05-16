@@ -15,14 +15,9 @@ export default class FunctionalityApi implements RepositoryApi<Functionality> {
 
     async Add(object:FunctionalityDto):Promise<Functionality> {
         let result:Functionality = {
+            ...object,
             id: crypto.randomUUID(),
-            name: object.name,
-            description: object.description,
-            priority: object.priority,
-            project: object.project,
-            createdTimestamp: new Date(),
-            status: object.status,
-            owner: object.owner
+            createdTimestamp: new Date()
         }
         
         this.DbSet.push(result);
