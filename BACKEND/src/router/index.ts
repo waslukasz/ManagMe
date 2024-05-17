@@ -3,6 +3,7 @@ import authentication from "./authentication";
 import users from "./users";
 import projects from "./projects";
 import functionalities from "./functionalities";
+import tasks from "./tasks";
 
 const router = express.Router();
 
@@ -11,6 +12,7 @@ export default (): express.Router => {
   users(router);
   projects(router);
   functionalities(router);
+  tasks(router);
 
   return router;
 };
