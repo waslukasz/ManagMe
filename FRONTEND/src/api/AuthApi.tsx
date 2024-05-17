@@ -22,7 +22,11 @@ export default class AuthApi {
 
     const result: AuthType = {
       user: {
-        ...user,
+        id: user.id,
+        name: user.name,
+        roles: user.roles,
+        surname: user.surname,
+        username: user.username,
       },
       token: tokens.token,
       refreshToken: tokens.refreshToken,

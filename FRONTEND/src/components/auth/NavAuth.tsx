@@ -4,18 +4,13 @@ import useAuth from "../../hooks/useAuth";
 
 export default function NavAuth() {
   const auth = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
 
   const [loginData, setLoginData] = useState({ username: "", password: "" });
-  const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState<boolean>(false);
   const [loginFailed, setLoginFailed] = useState<boolean>(false);
-
-  const handleShowLogin = (event: React.MouseEvent) => {
-    event.preventDefault();
-    setShowLogin((prevState) => !prevState);
-  };
 
   async function handleLogin() {
     const result = await auth.signIn(loginData.username, loginData.password);
@@ -45,10 +40,11 @@ export default function NavAuth() {
           </button>
         </div>
       )}
+
       {!auth.isLoggedIn && (
         <div className="relative z-50">
           <div
-            onClick={handleShowLogin}
+            onClick={() => setShowLogin((prevState) => !prevState)}
             className={`select-none ${
               !showLogin && "text-blue-500 hover:text-white hover:bg-blue-500"
             } border-blue-500 font-mono rounded-md border-solid border p-2  cursor-pointer transition-colors duration-100 ${

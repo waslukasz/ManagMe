@@ -26,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider = ({ children }: Props) => {
   const authApi = new AuthApi();
+
   const signIn = async (username: string, password: string) => {
     let result = await authApi.SignIn(username, password);
     if (result)

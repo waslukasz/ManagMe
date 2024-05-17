@@ -1,8 +1,10 @@
-import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
 import TaskApi from "../../api/TaskApi";
 import { StatusType, Task as TaskType } from "../../types/TaskType";
 import Task from "./Task";
+
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
 

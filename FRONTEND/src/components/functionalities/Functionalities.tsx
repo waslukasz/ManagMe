@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Functionality as FunctionalityType } from "../../types/FunctionalityType";
 import { Project as ProjectType } from "../../types/ProjectType";
