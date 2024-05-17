@@ -41,7 +41,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 
 export const register = async (req: express.Request, res: express.Response) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, roles, name, surname } = req.body;
 
     if (!username || !password) return res.sendStatus(400);
     const existingUser = await getUserByUsername(username);
@@ -53,7 +53,10 @@ export const register = async (req: express.Request, res: express.Response) => {
       authentication: {
         salt,
         password: await bcrypt.hash(password, salt),
+        roles,
       },
+      name,
+      surname,
     });
 
     return res.status(200).json(user).end();
