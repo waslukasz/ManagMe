@@ -1,5 +1,5 @@
 import express from "express";
-import { getUsers } from "../db/users";
+import { getUserById, getUsers } from "../db/users";
 
 export const getAllUsers = async (
   req: express.Request,
@@ -12,4 +12,10 @@ export const getAllUsers = async (
     console.log(error);
     return res.sendStatus(400);
   }
+};
+
+export const getUser = async (req: express.Request, res: express.Response) => {
+  const { id } = req.params;
+  const user = await getUserById(id);
+  return res.status(200).json(user).end();
 };

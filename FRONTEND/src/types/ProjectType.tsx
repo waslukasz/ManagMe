@@ -1,10 +1,10 @@
 export type Project = {
-    id:string,
-    name:string,
-    description:string|null
-}
+  _id: string;
+  name: string;
+  description: string | null;
+};
 
 export type ProjectDto = {
-    name:string,
-    description:string|null
-}
+  name: string;
+  description: string | null;
+};

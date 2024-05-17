@@ -7,7 +7,7 @@ export default function FunctionalitiesActiveProject({
 }: {
   data: ProjectType;
 }) {
-  const [currentProject, setCurrentProject] = useState<ProjectType>(data);
+  const [project, setProject] = useState<ProjectType>(data);
   const selectedStyle = {
     filter:
       "invert(79%) sepia(34%) saturate(1323%) hue-rotate(329deg) brightness(104%) contrast(97%)",
@@ -26,8 +26,8 @@ export default function FunctionalitiesActiveProject({
         </div>
         <hr />
         <div className="flex flex-col pt-1">
-          <span className="text-xl font-bold">{currentProject.name}</span>
-          <span className="text-xs mt-1">{currentProject.description}</span>
+          <span className="text-xl font-bold">{project.name}</span>
+          <span className="text-xs mt-1">{project.description}</span>
         </div>
       </div>
     </>

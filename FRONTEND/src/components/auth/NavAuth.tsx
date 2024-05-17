@@ -14,10 +14,7 @@ export default function NavAuth() {
 
   async function handleLogin() {
     const result = await auth.signIn(loginData.username, loginData.password);
-    if (!result) {
-      setLoginFailed(true);
-      return;
-    }
+    setLoginFailed(!result);
     if (from != "/") navigate(from, { replace: true });
   }
 
@@ -40,7 +37,6 @@ export default function NavAuth() {
           </button>
         </div>
       )}
-
       {!auth.isLoggedIn && (
         <div className="relative z-50">
           <div

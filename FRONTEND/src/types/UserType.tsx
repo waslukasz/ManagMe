@@ -8,11 +8,11 @@ export type User = {
 };
 
 export type UserProfile = {
-  username: string;
   id: string;
+  username: string;
   name: string;
   surname: string;
-  roles: Array<Role>;
+  roles: Array<string>;
 };
 
 export enum Role {

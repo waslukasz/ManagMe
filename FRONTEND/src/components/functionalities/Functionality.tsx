@@ -5,10 +5,11 @@ import AcceptIcon from "../../assets/accept.svg";
 import EditIcon from "../../assets/edit.svg";
 import DeleteIcon from "../../assets/delete.svg";
 import BackIcon from "../../assets/back.svg";
-import FunctionalityApi from "../../api/FunctionalityApi";
 import { Link } from "react-router-dom";
 import { format as formatDate } from "date-fns";
-import AuthApi from "../../api/AuthApi";
+import axios from "../../api/axios";
+
+//TODO : GODZINY FORMAT 24H
 
 export default function Functionality({
   data,
@@ -19,15 +20,11 @@ export default function Functionality({
   updateState: any;
   updateHandler: any;
 }) {
-  const functionalityApi = new FunctionalityApi();
-  const authApi = new AuthApi();
-  const [currentFunctionality, setCurrentFunctionality] =
-    useState<FunctionalityType>(data);
-  const [functionalityData, setFunctionalityData] =
-    useState<FunctionalityType>(currentFunctionality);
+  const [functionality, setFunctionality] = useState<FunctionalityType>(data);
+  const [functionalityEdited, setFunctionalityEdited] =
+    useState<FunctionalityType>(functionality);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [isDeleted, setIsDeleted] = useState<boolean>(false);
 
   const editStyle = {
     filter:
@@ -52,179 +49,177 @@ export default function Functionality({
   useEffect(() => {}, [updateState]);
 
   async function editHandler() {
-    if (functionalityData.name == "") return;
+    if (functionalityEdited.name == "") return;
     setIsEditing((prevState) => !prevState);
     if (!isEditing) return;
-    setCurrentFunctionality(
-      await functionalityApi.Update({
-        ...functionalityData,
+    await axios
+      .patch(`/functionality/${functionality._id}`, {
+        name: functionalityEdited.name,
+        description: functionalityEdited.description,
         priority: parseInt(priorityRef.current?.value!),
         status: parseInt(statusRef.current?.value!),
       })
-    );
-    updateHandler();
+      .then(() => {
+        updateHandler();
+      });
   }
 
   async function cancelEditHandler() {
-    setFunctionalityData(currentFunctionality);
+    setFunctionalityEdited(functionality);
     setIsEditing((prevState) => !prevState);
     return;
   }
 
   async function deleteHandler() {
-    await functionalityApi.Delete(currentFunctionality);
-    setIsDeleted(true);
-    updateHandler();
+    await axios.delete(`/functionality/${functionality._id}`).then(() => {
+      updateHandler();
+    });
   }
 
   return (
     <>
-      {!isDeleted && (
-        <div className="inline-flex flex-col min-w-32 shadow border border-solid border-gray-100 p-3 rounded font-sans justify-between">
-          <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
-            {!isEditing && (
-              <>
-                <img
-                  className="h-5 cursor-pointer"
-                  style={editStyle}
-                  src={EditIcon}
-                  alt="Edit"
-                  onClick={editHandler}
-                />
-                <img
-                  className="h-5 cursor-pointer"
-                  style={deleteStyle}
-                  src={DeleteIcon}
-                  alt="Delete"
-                  onClick={deleteHandler}
-                />
-              </>
-            )}
-
-            {isEditing && (
-              <>
-                <img
-                  className="h-5 cursor-pointer"
-                  style={acceptStyle}
-                  src={AcceptIcon}
-                  alt="Accept"
-                  onClick={editHandler}
-                />
-                <img
-                  className="h-5 cursor-pointer"
-                  style={backStyle}
-                  src={BackIcon}
-                  alt="Cancel"
-                  onClick={cancelEditHandler}
-                />
-              </>
-            )}
-          </div>
-          <hr />
-
+      <div className="inline-flex flex-col min-w-32 shadow border border-solid border-gray-100 p-3 rounded font-sans justify-between">
+        <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
           {!isEditing && (
             <>
-              <div className="flex flex-col flex-grow">
-                <div className="flex flex-col flex-grow">
-                  <span className="text-xl font-bold">
-                    {currentFunctionality.name}
-                  </span>
-                  <span className="text-sm mt-1">
-                    {currentFunctionality.description}
-                  </span>
-                </div>
-                <hr className="my-2" />
-                <div className="flex flex-col">
-                  <span className="text-xs text-right italic mt-1">
-                    Priority: {currentFunctionality.priority == 0 && <>Low</>}{" "}
-                    {currentFunctionality.priority == 1 && <>Medium</>}
-                    {currentFunctionality.priority == 2 && <>High</>}
-                  </span>
-                  <span className="text-xs text-right italic">
-                    Status: {currentFunctionality.status == 0 && <>TODO</>}{" "}
-                    {currentFunctionality.status == 1 && <>Doing</>}
-                    {currentFunctionality.status == 2 && <>Done</>}
-                  </span>
-
-                  <span className="text-xs text-right italic">
-                    Owner:{" "}
-                    {currentFunctionality.owner
-                      ? `${currentFunctionality.owner.name} ${currentFunctionality.owner.surname}`
-                      : "none"}
-                  </span>
-
-                  <span className="text-xs text-right italic">
-                    {formatDate(
-                      currentFunctionality.createdTimestamp,
-                      "hh:mm:ss - dd MMMM yyyy"
-                    )}
-                  </span>
-                  <Link
-                    to={"/tasks/" + currentFunctionality.id}
-                    className="inline-flex self-end text-sm hover:underline text-blue-400 cursor-pointer select-none"
-                  >
-                    Show tasks
-                  </Link>
-                </div>
-              </div>
+              <img
+                className="h-5 cursor-pointer"
+                style={editStyle}
+                src={EditIcon}
+                alt="Edit"
+                onClick={editHandler}
+              />
+              <img
+                className="h-5 cursor-pointer"
+                style={deleteStyle}
+                src={DeleteIcon}
+                alt="Delete"
+                onClick={deleteHandler}
+              />
             </>
           )}
 
           {isEditing && (
             <>
-              <div className="flex flex-col mt-2">
-                <label className="text-sm font-bold">Functionality name</label>
-                <input
-                  value={functionalityData.name}
-                  onChange={(event) =>
-                    setFunctionalityData({
-                      ...functionalityData,
-                      name: event.target.value,
-                    })
-                  }
-                  className="border border-solid focus:outline-none p-1 rounded"
-                  type="text"
-                />
-
-                <label className="text-sm font-bold mt-2">Description</label>
-                <textarea
-                  value={functionalityData.description ?? ""}
-                  onChange={(event) =>
-                    setFunctionalityData({
-                      ...functionalityData,
-                      description: event.target.value,
-                    })
-                  }
-                  className="border border-solid focus:outline-none p-1 rounded"
-                />
-
-                <label className="text-sm font-bold mt-2">Priority</label>
-                <select
-                  ref={priorityRef}
-                  defaultValue={currentFunctionality.priority}
-                  className="rounded border border-solid border-black"
-                >
-                  <option value="0">Low</option>
-                  <option value="1">Medium</option>
-                  <option value="2">High</option>
-                </select>
-
-                <label className="text-sm font-bold mt-2">Status:</label>
-                <select
-                  ref={statusRef}
-                  defaultValue={currentFunctionality.status}
-                  name="status"
-                  className="rounded border border-solid border-black"
-                >
-                  <option value="0">TODO</option>
-                  <option value="1">Doing</option>
-                  <option value="2">Done</option>
-                </select>
-              </div>
+              <img
+                className="h-5 cursor-pointer"
+                style={acceptStyle}
+                src={AcceptIcon}
+                alt="Accept"
+                onClick={editHandler}
+              />
+              <img
+                className="h-5 cursor-pointer"
+                style={backStyle}
+                src={BackIcon}
+                alt="Cancel"
+                onClick={cancelEditHandler}
+              />
             </>
           )}
         </div>
-      )}
+        <hr />
+
+        {!isEditing && (
+          <>
+            <div className="flex flex-col flex-grow">
+              <div className="flex flex-col flex-grow">
+                <span className="text-xl font-bold">{functionality.name}</span>
+                <span className="text-sm mt-1">
+                  {functionality.description}
+                </span>
+              </div>
+              <hr className="my-2" />
+              <div className="flex flex-col">
+                <span className="text-xs text-right italic mt-1">
+                  Priority: {functionality.priority == 0 && <>Low</>}{" "}
+                  {functionality.priority == 1 && <>Medium</>}
+                  {functionality.priority == 2 && <>High</>}
+                </span>
+                <span className="text-xs text-right italic">
+                  Status: {functionality.status == 0 && <>TODO</>}{" "}
+                  {functionality.status == 1 && <>Doing</>}
+                  {functionality.status == 2 && <>Done</>}
+                </span>
+
+                <span className="text-xs text-right italic">
+                  Owner:{" "}
+                  {functionality.owner
+                    ? `${functionality.owner.name} ${functionality.owner.surname}`
+                    : "none"}
+                </span>
+
+                <span className="text-xs text-right italic">
+                  {formatDate(
+                    new Date(functionality.created),
+                    "hh:mm:ss - dd MMMM yyyy"
+                  )}
+                </span>
+                <Link
+                  to={"/tasks/" + functionality._id}
+                  className="inline-flex self-end text-sm hover:underline text-blue-400 cursor-pointer select-none"
+                >
+                  Show tasks
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
+
+        {isEditing && (
+          <>
+            <div className="flex flex-col mt-2">
+              <label className="text-sm font-bold">Functionality name</label>
+              <input
+                value={functionalityEdited.name}
+                onChange={(event) =>
+                  setFunctionalityEdited({
+                    ...functionalityEdited,
+                    name: event.target.value,
+                  })
+                }
+                className="border border-solid focus:outline-none p-1 rounded"
+                type="text"
+              />
+
+              <label className="text-sm font-bold mt-2">Description</label>
+              <textarea
+                value={functionalityEdited.description ?? ""}
+                onChange={(event) =>
+                  setFunctionalityEdited({
+                    ...functionalityEdited,
+                    description: event.target.value,
+                  })
+                }
+                className="border border-solid focus:outline-none p-1 rounded"
+              />
+
+              <label className="text-sm font-bold mt-2">Priority</label>
+              <select
+                ref={priorityRef}
+                defaultValue={functionality.priority}
+                className="rounded border border-solid border-black"
+              >
+                <option value="0">Low</option>
+                <option value="1">Medium</option>
+                <option value="2">High</option>
+              </select>
+
+              <label className="text-sm font-bold mt-2">Status:</label>
+              <select
+                ref={statusRef}
+                defaultValue={functionality.status}
+                name="status"
+                className="rounded border border-solid border-black"
+              >
+                <option value="0">TODO</option>
+                <option value="1">Doing</option>
+                <option value="2">Done</option>
+              </select>
+            </div>
+          </>
+        )}
+      </div>
     </>
   );
 }

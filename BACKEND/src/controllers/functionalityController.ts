@@ -14,7 +14,9 @@ export const getAllFunctionalities = async (
   res: express.Response
 ) => {
   try {
-    const functionalities = await getFunctionalities();
+    const functionalities = await getFunctionalities().populate(
+      "owner project"
+    );
     return res.status(200).json(functionalities);
   } catch (error) {
     console.log(error);
@@ -28,7 +30,9 @@ export const getFunctionality = async (
 ) => {
   try {
     const { id } = req.params;
-    const functionality = await getFunctionalityById(id);
+    const functionality = await getFunctionalityById(id).populate(
+      "owner project"
+    );
     if (!functionality) return res.sendStatus(404);
     return res.status(200).json(functionality);
   } catch (error) {

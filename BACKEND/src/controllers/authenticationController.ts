@@ -1,7 +1,28 @@
-import { createUser, getUserByUsername } from "../db/users";
+import {
+  createUser,
+  getUserBySessionToken,
+  getUserByUsername,
+} from "../db/users";
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
+export const auth = async (req: express.Request, res: express.Response) => {
+  const { _auth } = req.cookies;
+  if (!_auth) return res.sendStatus(400);
+  const user = await getUserBySessionToken(_auth);
+  if (!user) return res.sendStatus(400);
+
+  const response = {
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    surname: user.surname,
+    roles: user.authentication.roles,
+  };
+
+  return res.status(200).json(response).end();
+};
 
 export const login = async (req: express.Request, res: express.Response) => {
   try {
@@ -32,11 +53,25 @@ export const login = async (req: express.Request, res: express.Response) => {
     user.authentication.sessionToken = token;
     await user.save();
 
-    return res.cookie("_auth", token).status(200).end();
+    const response = {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      surname: user.surname,
+      roles: user.authentication.roles,
+    };
+
+    return res.cookie("_auth", token).json(response).status(200).end();
   } catch (error) {
     console.log(error);
     return res.sendStatus(400);
   }
+};
+
+export const logout = async (req: express.Request, res: express.Response) => {
+  const { _auth } = req.cookies;
+  if (!_auth) return res.sendStatus(400);
+  return res.clearCookie("_auth").status(200).end();
 };
 
 export const register = async (req: express.Request, res: express.Response) => {

@@ -1,19 +1,24 @@
+import { Project } from "./ProjectType";
+
 export type Functionality = {
-  id: string;
+  _id: string;
   name: string;
   description: string | null;
   priority: PriorityType;
-  project: string;
-  createdTimestamp: Date;
   status: StatusType;
+  project: Project;
   owner: FunctionalityOwner;
+  created: Date;
 };
 
 export type FunctionalityOwner = {
-  id: string;
+  _id: string;
   username: string;
   name: string;
   surname: string;
+  authentication: {
+    roles: Array<string>;
+  };
 };
 
 export type FunctionalityDto = {
@@ -21,8 +26,6 @@ export type FunctionalityDto = {
   description: string | null;
   priority: PriorityType;
   project: string;
-  status: StatusType;
-  owner: FunctionalityOwner;
 };
 
 export enum StatusType {

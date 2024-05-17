@@ -1,13 +1,12 @@
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Project from "./Project";
 import { Project as ProjectType } from "../../types/ProjectType";
-import ProjectApi from "../../api/ProjectApi";
+import axios from "../../api/axios";
+
+import Project from "./Project";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
 
 export default function Projects() {
-  const projectApi = new ProjectApi();
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isUpdated, setIsUpdated] = useState<boolean>(true);
@@ -15,8 +14,9 @@ export default function Projects() {
   async function fetchAllProjects() {
     setIsFetching(true);
     try {
-      let projects = await projectApi.GetAll();
-      setProjects(projects);
+      await axios.get("/project").then((response) => {
+        setProjects(response.data);
+      });
     } catch (error) {}
     setIsFetching(false);
   }
@@ -55,7 +55,7 @@ export default function Projects() {
           <div className="grid grid-cols-5 auto-rows-fr gap-3 m-3">
             {projects.map((project) => (
               <Project
-                key={project.id}
+                key={project._id}
                 data={project}
                 updateState={isUpdated}
                 updateHandler={updateHandler}

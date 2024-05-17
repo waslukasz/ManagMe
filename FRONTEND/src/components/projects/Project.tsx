@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Project as ProjectType } from "../../types/ProjectType";
-import ProjectApi from "../../api/ProjectApi";
 
 import AcceptIcon from "../../assets/accept.svg";
 import EditIcon from "../../assets/edit.svg";
@@ -8,6 +7,7 @@ import DeleteIcon from "../../assets/delete.svg";
 import BackIcon from "../../assets/back.svg";
 import SelectedIcon from "../../assets/selected.svg";
 import NotSelectedIcon from "../../assets/notselected.svg";
+import axios from "../../api/axios";
 
 export default function Project({
   data,
@@ -18,14 +18,12 @@ export default function Project({
   updateState: any;
   updateHandler: any;
 }) {
-  const projectApi = new ProjectApi();
-  const [currentProject, setCurrentProject] = useState<ProjectType>(data);
-  const [projectData, setProjectData] = useState<ProjectType>(currentProject);
+  const [project, setProject] = useState<ProjectType>(data);
+  const [projectEdited, setProjectEdited] = useState<ProjectType>(project);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [isDeleted, setIsDeleted] = useState<boolean>(false);
   const [isActive, setIsActive] = useState<boolean>(
-    projectApi.GetActiveId() == currentProject.id
+    localStorage.getItem("active_project") == project._id
   );
 
   const editStyle = {
@@ -49,140 +47,152 @@ export default function Project({
       "invert(79%) sepia(34%) saturate(1323%) hue-rotate(329deg) brightness(104%) contrast(97%)",
   };
 
-  useEffect(() => {
-    setIsActive(projectApi.GetActiveId() == currentProject.id);
-  }, [updateState]);
-
   async function editHandler() {
-    if (projectData.name == "") return;
+    if (projectEdited.name == "") return;
     setIsEditing((prevState) => !prevState);
     if (!isEditing) return;
-    setCurrentProject(await projectApi.Update(projectData));
+    await axios
+      .patch(`/project/${project._id}`, {
+        name: projectEdited.name,
+        description: projectEdited.description,
+      })
+      .then((response) => {
+        setProject(response.data);
+        updateHandler();
+      })
+      .catch((error) => {});
   }
 
   async function cancelEditHandler() {
-    setProjectData(currentProject);
+    setProjectEdited(project);
     setIsEditing((prevState) => !prevState);
     return;
   }
 
   async function deleteHandler() {
-    await projectApi.Delete(currentProject);
-    if (isActive) updateHandler();
-    setIsDeleted(true);
-    updateHandler();
+    await axios.delete(`/project/${project._id}`).then((response) => {
+      updateHandler();
+      if (isActive) localStorage.removeItem("active_project");
+    });
   }
 
   async function selectHandler() {
-    projectApi.SetActive(currentProject);
+    console.log(project._id);
+    localStorage.setItem("active_project", project._id);
     updateHandler();
   }
 
+  useEffect(() => {
+    if (!localStorage.getItem("active_project"))
+      axios.get("/project").then((result) => {
+        localStorage.setItem("active_project", result.data[0]._id);
+      });
+  });
+
   return (
     <>
-      {!isDeleted && (
-        <div
-          className={`inline-flex flex-col min-w-32 p-3 rounded-md font-sans shadow-md border border-solid ${
-            (!isActive && "border-gray-100") || "border-yellow-500"
-          }`}
-        >
-          <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2 select-none">
-            {isActive && (
-              <img
-                className="h-4 mr-auto self-start"
-                style={selectedStyle}
-                src={SelectedIcon}
-                alt="Selected"
-              />
-            )}
+      <div
+        className={`inline-flex flex-col min-w-32 p-3 rounded-md font-sans shadow-md border border-solid ${
+          (!isActive && "border-gray-100") || "border-yellow-500"
+        }`}
+      >
+        <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2 select-none">
+          {isActive && (
+            <img
+              className="h-4 mr-auto self-start"
+              style={selectedStyle}
+              src={SelectedIcon}
+              alt="Selected"
+            />
+          )}
 
-            {!isActive && (
-              <img
-                className="h-4 cursor-pointer mr-auto self-start select-none"
-                onClick={selectHandler}
-                style={selectedStyle}
-                src={NotSelectedIcon}
-                alt="Selected"
-              />
-            )}
+          {!isActive && (
+            <img
+              className="h-4 cursor-pointer mr-auto self-start select-none"
+              onClick={selectHandler}
+              style={selectedStyle}
+              src={NotSelectedIcon}
+              alt="Selected"
+            />
+          )}
 
-            {!isEditing && (
-              <>
-                <img
-                  className="h-5 cursor-pointer"
-                  style={editStyle}
-                  src={EditIcon}
-                  alt="Edit"
-                  onClick={editHandler}
-                />
-                <img
-                  className="h-5 cursor-pointer"
-                  style={deleteStyle}
-                  src={DeleteIcon}
-                  alt="Delete"
-                  onClick={deleteHandler}
-                />
-              </>
-            )}
-
-            {isEditing && (
-              <>
-                <img
-                  className="h-5 cursor-pointer"
-                  style={acceptStyle}
-                  src={AcceptIcon}
-                  alt="Accept"
-                  onClick={editHandler}
-                />
-                <img
-                  className="h-5 cursor-pointer"
-                  style={backStyle}
-                  src={BackIcon}
-                  alt="Cancel"
-                  onClick={cancelEditHandler}
-                />
-              </>
-            )}
-          </div>
-          <hr />
           {!isEditing && (
-            <div className="flex flex-col pt-1">
-              <span className="text-xl font-bold">{currentProject.name}</span>
-              <span className="text-xs mt-1">{currentProject.description}</span>
-            </div>
+            <>
+              <img
+                className="h-5 cursor-pointer"
+                style={editStyle}
+                src={EditIcon}
+                alt="Edit"
+                onClick={editHandler}
+              />
+              <img
+                className="h-5 cursor-pointer"
+                style={deleteStyle}
+                src={DeleteIcon}
+                alt="Delete"
+                onClick={deleteHandler}
+              />
+            </>
           )}
 
           {isEditing && (
-            <div className="flex flex-col gap-0.5 mt-2">
-              <label className="select-none text-sm font-bold">
-                Project name
-              </label>
-              <input
-                value={projectData.name}
-                onChange={(event) =>
-                  setProjectData({ ...projectData, name: event.target.value })
-                }
-                className="border border-solid focus:outline-none p-1 rounded"
-                type="text"
+            <>
+              <img
+                className="h-5 cursor-pointer"
+                style={acceptStyle}
+                src={AcceptIcon}
+                alt="Accept"
+                onClick={editHandler}
               />
-              <br />
-              <label className="select-none text-sm font-bold">
-                Description
-              </label>
-              <textarea
-                value={projectData.description ?? ""}
-                onChange={(event) =>
-                  setProjectData({
-                    ...projectData,
-                    description: event.target.value,
-                  })
-                }
-                className="border border-solid focus:outline-none p-1 rounded"
+              <img
+                className="h-5 cursor-pointer"
+                style={backStyle}
+                src={BackIcon}
+                alt="Cancel"
+                onClick={cancelEditHandler}
               />
-            </div>
+            </>
           )}
         </div>
-      )}
+        <hr />
+        {!isEditing && (
+          <div className="flex flex-col pt-1">
+            <span className="text-xl font-bold">{project.name}</span>
+            <span className="text-xs mt-1">{project.description}</span>
+          </div>
+        )}
+
+        {isEditing && (
+          <div className="flex flex-col gap-0.5 mt-2">
+            <label className="select-none text-sm font-bold">
+              Project name
+            </label>
+            <input
+              value={projectEdited.name}
+              onChange={(event) =>
+                setProjectEdited({
+                  ...projectEdited,
+                  name: event.target.value,
+                })
+              }
+              className="border border-solid focus:outline-none p-1 rounded"
+              type="text"
+            />
+            <br />
+            <label className="select-none text-sm font-bold">Description</label>
+            <textarea
+              value={projectEdited.description ?? ""}
+              onChange={(event) =>
+                setProjectEdited({
+                  ...projectEdited,
+                  description: event.target.value,
+                })
+              }
+              className="border border-solid focus:outline-none p-1 rounded"
+            />
+          </div>
+        )}
+      </div>
     </>
   );
 }

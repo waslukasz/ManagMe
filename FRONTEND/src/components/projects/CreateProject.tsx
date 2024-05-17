@@ -1,30 +1,33 @@
 import { useState } from "react";
-import ProjectApi from "../../api/ProjectApi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ProjectDto } from "../../types/ProjectType";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
+import axios from "../../api/axios";
 
 export default function ProjectsCreate() {
-  const [projectData, setProjectData] = useState<ProjectDto>({
+  const [project, setProject] = useState<ProjectDto>({
     name: "",
     description: "",
   });
-  const [createFailed, setCreateFailed] = useState<boolean>(false);
+  const [hasFailed, setHasFailed] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  const projectApi = new ProjectApi();
 
   const handleSubmit = (event: React.MouseEvent) => {
     event.preventDefault();
 
-    if (projectData.name == "") {
-      setCreateFailed(true);
-      return;
-    }
-
-    projectApi.Add(projectData);
-    navigate("/projects");
+    axios
+      .post("/project", {
+        name: project.name,
+        description: project.description,
+      })
+      .then((response) => {
+        navigate("/projects");
+      })
+      .catch((error) => {
+        setHasFailed(true);
+      });
   };
 
   return (
@@ -38,14 +41,14 @@ export default function ProjectsCreate() {
           <form className="inline-flex flex-col gap-1">
             <label className="font-bold">Project name</label>
             <input
-              value={projectData.name}
+              value={project.name}
               onChange={(event) =>
-                setProjectData({ ...projectData, name: event.target.value })
+                setProject({ ...project, name: event.target.value })
               }
               className="rounded border border-solid p-2 border-black"
               type="text"
             />
-            {createFailed && (
+            {hasFailed && (
               <span className="text-sm text-red-500 italic">
                 This field cannot be empty.
               </span>
@@ -53,10 +56,10 @@ export default function ProjectsCreate() {
 
             <label className="font-bold mt-3">Description</label>
             <textarea
-              value={projectData.description ?? ""}
+              value={project.description ?? ""}
               onChange={(event) =>
-                setProjectData({
-                  ...projectData,
+                setProject({
+                  ...project,
                   description: event.target.value,
                 })
               }

@@ -1,14 +1,11 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { UserProfile } from "../types/UserType";
-import AuthApi from "../api/AuthApi";
 import axios from "../api/axios";
 
 type Props = { children: React.ReactNode };
 
 type AuthContextType = {
   user: UserProfile | null;
-  token: string | null;
-  refreshToken: string | null;
   isLoggedIn: boolean;
   signIn: (username: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
@@ -17,8 +14,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  token: null,
-  refreshToken: null,
   isLoggedIn: false,
   signIn: async (username: string, password: string) => false,
   signOut: async () => {},
@@ -26,34 +21,54 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: Props) => {
-  const authApi = new AuthApi();
+  const signIn = async (
+    username: string,
+    password: string
+  ): Promise<boolean> => {
+    await axios
+      .post("/auth/login", {
+        username: username,
+        password: password,
+      })
+      .then((response) => {
+        const user: UserProfile = { ...response.data };
 
-  const signIn = async (username: string, password: string) => {
-    let result = await authApi.SignIn(username, password);
-    if (result)
-      setData((prevState) => ({ ...prevState, ...result, isLoggedIn: true }));
-    return result ? true : false;
+        setData((prevState) => ({
+          ...prevState,
+          user: { ...user },
+          isLoggedIn: true,
+        }));
+        return true;
+      });
+    return false;
   };
 
   const signOut = async () => {
-    console.log(await axios.get("/"));
-    // await authApi.SignOut();
-    // setData((prevState) => ({
-    //   ...prevState,
-    //   user: null,
-    //   token: null,
-    //   refreshToken: null,
-    //   isLoggedIn: false,
-    // }));
+    await axios.post("/auth/logout");
+    setData((prevState) => ({ ...prevState, user: null, isLoggedIn: false }));
   };
 
   const updateToken = async (token: string) => {
-    await authApi.RefreshToken(token);
+    // TODO
   };
 
+  useEffect(() => {
+    if (!document.cookie.includes("_auth")) return;
+
+    axios.get("/auth").then((response) => {
+      const user: UserProfile = { ...response.data };
+
+      setData((prevState) => ({
+        ...prevState,
+        user: { ...user },
+        isLoggedIn: true,
+      }));
+    });
+  }, []);
+
   const [data, setData] = useState<AuthContextType>({
-    ...JSON.parse(localStorage.getItem("_auth")!),
-    isLoggedIn: JSON.parse(localStorage.getItem("_auth")!) ? true : false,
+    user: null,
+    isLoggedIn: false,
     signIn: signIn,
     signOut: signOut,
     updateToken: updateToken,

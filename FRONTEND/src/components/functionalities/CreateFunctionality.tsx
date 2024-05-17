@@ -1,40 +1,38 @@
 import { useRef, useState } from "react";
-import ProjectApi from "../../api/ProjectApi";
-import FunctionalityApi from "../../api/FunctionalityApi";
 import { useNavigate } from "react-router-dom";
 import { FunctionalityDto, PriorityType } from "../../types/FunctionalityType";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
-import useAuth from "../../hooks/useAuth";
+import axios from "../../api/axios";
 
 export default function ProjectsCreate() {
-  const functionalityApi = new FunctionalityApi();
-  const projectApi = new ProjectApi();
-  const auth = useAuth();
-  const [functionalityData, setFunctionalityData] = useState<FunctionalityDto>({
+  const [functionality, setFunctionality] = useState<FunctionalityDto>({
     name: "",
     description: "",
     priority: 0,
-    project: projectApi.GetActiveId()!,
-    status: 0,
-    owner: { ...auth.user! },
+    project: localStorage.getItem("active_project")!,
   });
-  const [createFailed, setCreateFailed] = useState<boolean>(false);
+  const [hasFailed, setHasFailed] = useState<boolean>(false);
 
   const priorityRef = useRef<HTMLSelectElement>(null);
   const navigate = useNavigate();
 
   const handleSubmit = (event: React.MouseEvent) => {
     event.preventDefault();
-    if (functionalityData.name == "") {
-      setCreateFailed(true);
-      return;
-    }
-    functionalityApi.Add({
-      ...functionalityData,
-      priority: parseInt(priorityRef.current?.value!),
-    });
-    navigate("/functionalities");
+
+    axios
+      .post("/functionality", {
+        name: functionality.name,
+        description: functionality.description,
+        priority: priorityRef.current?.value!,
+        project: functionality.project,
+      })
+      .then((response) => {
+        navigate("/functionalities");
+      })
+      .catch((error) => {
+        setHasFailed(true);
+      });
   };
 
   return (
@@ -49,17 +47,17 @@ export default function ProjectsCreate() {
           <form className="inline-flex flex-col gap-1">
             <label className="font-bold">Functionality name</label>
             <input
-              value={functionalityData.name}
+              value={functionality.name}
               onChange={(event) =>
-                setFunctionalityData({
-                  ...functionalityData,
+                setFunctionality({
+                  ...functionality,
                   name: event.target.value,
                 })
               }
               className="rounded border border-solid p-2 border-black"
               type="text"
             />
-            {createFailed && (
+            {hasFailed && (
               <span className="text-sm text-red-500 italic">
                 This field cannot be empty.
               </span>
@@ -67,10 +65,10 @@ export default function ProjectsCreate() {
 
             <label className="font-bold mt-2">Description</label>
             <textarea
-              value={functionalityData.description ?? ""}
+              value={functionality.description ?? ""}
               onChange={(event) =>
-                setFunctionalityData({
-                  ...functionalityData,
+                setFunctionality({
+                  ...functionality,
                   description: event.target.value,
                 })
               }
@@ -88,7 +86,7 @@ export default function ProjectsCreate() {
             >
               <option value={PriorityType.LOW}>Low</option>
               <option value={PriorityType.MEDIUM}>Medium</option>
-              <option value={PriorityType.LOW}>High</option>
+              <option value={PriorityType.HIGH}>High</option>
             </select>
 
             <button
