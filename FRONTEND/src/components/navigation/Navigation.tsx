@@ -8,6 +8,12 @@ export default function Navigation() {
         <Link className="text-red-500 font-bold hover:underline" to="/projects">
           Projects
         </Link>
+        <Link
+          className="text-red-500 font-bold hover:underline"
+          to="/functionalities"
+        >
+          Functionalities
+        </Link>
       </div>
       <NavAuth />
     </div>

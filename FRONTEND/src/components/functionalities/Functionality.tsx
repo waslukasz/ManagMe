@@ -8,6 +8,7 @@ import BackIcon from "../../assets/back.svg";
 import FunctionalityApi from "../../api/FunctionalityApi";
 import { Link } from "react-router-dom";
 import { format as formatDate } from "date-fns";
+import AuthApi from "../../api/AuthApi";
 
 export default function Functionality({
   data,
@@ -19,6 +20,7 @@ export default function Functionality({
   updateHandler: any;
 }) {
   const functionalityApi = new FunctionalityApi();
+  const authApi = new AuthApi();
   const [currentFunctionality, setCurrentFunctionality] =
     useState<FunctionalityType>(data);
   const [functionalityData, setFunctionalityData] =
@@ -143,6 +145,14 @@ export default function Functionality({
                     {currentFunctionality.status == 1 && <>Doing</>}
                     {currentFunctionality.status == 2 && <>Done</>}
                   </span>
+
+                  <span className="text-xs text-right italic">
+                    Owner:{" "}
+                    {currentFunctionality.owner
+                      ? `${currentFunctionality.owner.name} ${currentFunctionality.owner.surname}`
+                      : "none"}
+                  </span>
+
                   <span className="text-xs text-right italic">
                     {formatDate(
                       currentFunctionality.createdTimestamp,

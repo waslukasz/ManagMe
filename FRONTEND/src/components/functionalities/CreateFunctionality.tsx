@@ -1,21 +1,23 @@
 import { useRef, useState } from "react";
 import ProjectApi from "../../api/ProjectApi";
 import FunctionalityApi from "../../api/FunctionalityApi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FunctionalityDto, PriorityType } from "../../types/FunctionalityType";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
+import useAuth from "../../hooks/useAuth";
 
 export default function ProjectsCreate() {
   const functionalityApi = new FunctionalityApi();
   const projectApi = new ProjectApi();
+  const auth = useAuth();
   const [functionalityData, setFunctionalityData] = useState<FunctionalityDto>({
     name: "",
     description: "",
     priority: 0,
     project: projectApi.GetActiveId()!,
     status: 0,
-    owner: "",
+    owner: { ...auth.user! },
   });
   const [createFailed, setCreateFailed] = useState<boolean>(false);
 

@@ -210,7 +210,7 @@ export default function Task({
                       <>
                         {users.map((user) => (
                           <option key={user.id} value={user.id}>
-                            {user.username}
+                            {user.name} {user.surname}
                           </option>
                         ))}
                       </>
@@ -271,8 +271,13 @@ export default function Task({
                 <span className="text-xs italic">
                   Assigned user:{" "}
                   {updateState && currentTask.assignedUserId
-                    ? users.find((u) => u.id == currentTask.assignedUserId)
-                        ?.username
+                    ? `${
+                        users.find((u) => u.id == currentTask.assignedUserId)
+                          ?.name
+                      } ${
+                        users.find((u) => u.id == currentTask.assignedUserId)
+                          ?.surname
+                      }`
                     : "not assigned"}
                 </span>
                 <span className="text-xs text-right italic">

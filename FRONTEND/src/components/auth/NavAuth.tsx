@@ -18,8 +18,8 @@ export default function NavAuth() {
   };
 
   async function handleLogin() {
-    await auth.signIn(loginData.username, loginData.password);
-    navigate(from, { replace: true });
+    const result = await auth.signIn(loginData.username, loginData.password);
+    if (from != "/") navigate(from, { replace: true });
   }
 
   async function handleLogout() {
