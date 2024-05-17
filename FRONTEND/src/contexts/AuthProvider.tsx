@@ -1,6 +1,7 @@
 import React, { createContext, useState } from "react";
 import { UserProfile } from "../types/UserType";
 import AuthApi from "../api/AuthApi";
+import axios from "../api/axios";
 
 type Props = { children: React.ReactNode };
 
@@ -35,14 +36,15 @@ export const AuthProvider = ({ children }: Props) => {
   };
 
   const signOut = async () => {
-    await authApi.SignOut();
-    setData((prevState) => ({
-      ...prevState,
-      user: null,
-      token: null,
-      refreshToken: null,
-      isLoggedIn: false,
-    }));
+    console.log(await axios.get("/"));
+    // await authApi.SignOut();
+    // setData((prevState) => ({
+    //   ...prevState,
+    //   user: null,
+    //   token: null,
+    //   refreshToken: null,
+    //   isLoggedIn: false,
+    // }));
   };
 
   const updateToken = async (token: string) => {
