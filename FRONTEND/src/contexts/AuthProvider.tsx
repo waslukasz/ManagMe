@@ -9,7 +9,7 @@ type AuthContextType = {
   token: string | null;
   refreshToken: string | null;
   isLoggedIn: boolean;
-  signIn: (username: string, password: string) => Promise<void>;
+  signIn: (username: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   updateToken: (token: string) => Promise<void>;
 };
@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   refreshToken: null,
   isLoggedIn: false,
-  signIn: async (username: string, password: string) => {},
+  signIn: async (username: string, password: string) => false,
   signOut: async () => {},
   updateToken: async (token: string) => {},
 });
@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }: Props) => {
     let result = await authApi.SignIn(username, password);
     if (result)
       setData((prevState) => ({ ...prevState, ...result, isLoggedIn: true }));
+    return result ? true : false;
   };
 
   const signOut = async () => {

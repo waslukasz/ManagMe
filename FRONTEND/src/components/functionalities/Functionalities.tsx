@@ -48,19 +48,19 @@ export default function Functionalities() {
       <div className="flex flex-col">
         <SubNavigation>
           <SubNavLink to={"/projects"} label="Go to projects" />
-          <SubNavLink
-            to={"/functionalities/create"}
-            label="Create functionality"
-          />
-        </SubNavigation>
-        <div className="inline-flex flex-col p-3 bg-red-50 items-start">
-          {!isFetching && activeProject != undefined && (
-            <>
-              <span className="text-xl font-bold mb-2">Active Project</span>
-              <FunctionalitiesActiveProject data={activeProject!} />
-            </>
+          {activeProject && (
+            <SubNavLink
+              to={"/functionalities/create"}
+              label="Create functionality"
+            />
           )}
-        </div>
+        </SubNavigation>
+        {!isFetching && activeProject && (
+          <div className="inline-flex flex-col p-3 bg-red-50 items-start">
+            <span className="text-xl font-bold mb-2">Active Project</span>
+            <FunctionalitiesActiveProject data={activeProject!} />
+          </div>
+        )}
         <span className="text-4xl mt-5 ml-3">Functionalities</span>
         <div className="flex gap-5 mt-5 ml-3">
           <span

@@ -1,16 +1,16 @@
 import { useState } from "react";
-import useAuth from "../../hooks/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 export default function NavAuth() {
   const auth = useAuth();
-  const [loginData, setLoginData] = useState({ username: "", password: "" });
-  const [showLogin, setShowLogin] = useState<boolean>(false);
-  const [loginFailed, setLoginFailed] = useState<boolean>(false);
-
-  const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
+
+  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const navigate = useNavigate();
+  const [showLogin, setShowLogin] = useState<boolean>(false);
+  const [loginFailed, setLoginFailed] = useState<boolean>(false);
 
   const handleShowLogin = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -19,6 +19,10 @@ export default function NavAuth() {
 
   async function handleLogin() {
     const result = await auth.signIn(loginData.username, loginData.password);
+    if (!result) {
+      setLoginFailed(true);
+      return;
+    }
     if (from != "/") navigate(from, { replace: true });
   }
 
