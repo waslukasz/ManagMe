@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import {
+  FunctionalityDtoUpdate,
   Functionality as FunctionalityType,
-  PriorityType,
-  StatusType,
-} from "../../types/FunctionalityType";
-
+} from "../../types/FunctionalityTypes";
 import AcceptIcon from "../../assets/accept.svg";
 import EditIcon from "../../assets/edit.svg";
 import DeleteIcon from "../../assets/delete.svg";
@@ -12,13 +10,6 @@ import BackIcon from "../../assets/back.svg";
 import { Link } from "react-router-dom";
 import { format as formatDate } from "date-fns";
 import axios from "../../api/axios";
-
-type FunctionalityDto = {
-  name: string;
-  description: string | null;
-  priority: PriorityType;
-  status: StatusType;
-};
 
 export default function Functionality({
   data,
@@ -30,12 +21,9 @@ export default function Functionality({
   updateHandler: any;
 }) {
   const [functionality, setFunctionality] = useState<FunctionalityType>(data);
-  const [form, setForm] = useState<FunctionalityDto>({
-    name: functionality.name,
-    description: functionality.description,
-    priority: functionality.priority,
-    status: functionality.status,
-  });
+  const [form, setForm] = useState<FunctionalityDtoUpdate>(
+    new FunctionalityDtoUpdate(functionality)
+  );
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -76,7 +64,7 @@ export default function Functionality({
     }
 
     axios
-      .patch<FunctionalityType>(`/functionality/${functionality._id}`, form)
+      .patch<FunctionalityType>(`/functionality/${functionality.id}`, form)
       .then(() => {
         setFunctionality({ ...functionality, ...form });
         setIsEditing(false);
@@ -85,17 +73,12 @@ export default function Functionality({
   }
 
   async function handleCancel() {
-    setForm({
-      name: functionality.name,
-      description: functionality.description,
-      priority: functionality.priority,
-      status: functionality.status,
-    });
+    setForm(new FunctionalityDtoUpdate(functionality));
     setIsEditing(false);
   }
 
   async function handleDelete() {
-    axios.delete(`/functionality/${functionality._id}`).then(() => {
+    axios.delete(`/functionality/${functionality.id}`).then(() => {
       updateHandler();
     });
   }
@@ -180,7 +163,7 @@ export default function Functionality({
                   )}
                 </span>
                 <Link
-                  to={"/tasks/" + functionality._id}
+                  to={"/tasks/" + functionality.id}
                   className="inline-flex self-end text-sm hover:underline text-blue-400 cursor-pointer select-none"
                 >
                   Show tasks

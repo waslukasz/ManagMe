@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Project as ProjectType } from "../../types/ProjectType";
 import axios from "../../api/axios";
-
-import Project from "./Project";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
+import {
+  Project as ProjectType,
+  ProjectEntity,
+} from "../../types/ProjectTypes";
+import Project from "./Project";
 
 export default function Projects() {
   const [projects, setProjects] = useState<ProjectType[]>([]);
@@ -14,8 +16,8 @@ export default function Projects() {
   async function fetchAllProjects() {
     setIsFetching(true);
     try {
-      await axios.get("/project").then((response) => {
-        setProjects(response.data);
+      await axios.get<ProjectEntity[]>("/project").then((response) => {
+        setProjects(response.data.map((entity) => new ProjectType(entity)));
       });
     } catch (error) {}
     setIsFetching(false);
@@ -28,7 +30,7 @@ export default function Projects() {
     let result: string = "";
 
     if (!activeProjectId) {
-      await axios.get<ProjectType[]>("/project").then((response) => {
+      await axios.get<ProjectEntity[]>("/project").then((response) => {
         result = response.data[0]._id;
         localStorage.setItem("active_project", response.data[0]._id);
       });
@@ -70,7 +72,7 @@ export default function Projects() {
           <div className="grid grid-cols-5 auto-rows-fr gap-3 m-3">
             {projects.map((project) => (
               <Project
-                key={project._id}
+                key={project.id}
                 data={project}
                 updateState={isUpdated}
                 updateHandler={updateHandler}

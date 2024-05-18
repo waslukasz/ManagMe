@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
-import { Functionality as FunctionalityType } from "../../types/FunctionalityType";
-import { Project as ProjectType } from "../../types/ProjectType";
+import {
+  FunctionalityEntity,
+  Functionality as FunctionalityType,
+} from "../../types/FunctionalityTypes";
 import Functionality from "./Functionality";
 import FunctionalitiesActiveProject from "./FunctionalitiesActiveProject";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
 import axios from "../../api/axios";
+import { Project, ProjectEntity } from "../../types/ProjectTypes";
 
 export default function Functionalities() {
   const [functionalities, setFunctionalities] = useState<FunctionalityType[]>(
     []
   );
-  const [activeProject, setActiveProject] = useState<ProjectType>(
-    {} as ProjectType
-  );
+  const [activeProject, setActiveProject] = useState<Project>(new Project());
   const [selectedStatus, setSelectedStatus] = useState<number>(-1);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isUpdated, setIsUpdated] = useState<boolean>(true);
@@ -22,9 +23,11 @@ export default function Functionalities() {
     setIsFetching(true);
     try {
       await axios
-        .get<FunctionalityType[]>("/functionality")
+        .get<FunctionalityEntity[]>("/functionality")
         .then((response) => {
-          setFunctionalities(response.data);
+          setFunctionalities(
+            response.data.map((entity) => new FunctionalityType(entity))
+          );
         });
     } catch (error) {}
     setIsFetching(false);
@@ -34,11 +37,11 @@ export default function Functionalities() {
     const activeProjectId: string | null =
       localStorage.getItem("active_project");
 
-    let result: ProjectType = {} as ProjectType;
+    let result: Project = {} as Project;
 
     if (!activeProjectId) {
-      await axios.get<ProjectType[]>("/project").then((response) => {
-        result = response.data[0];
+      await axios.get<ProjectEntity[]>("/project").then((response) => {
+        result = new Project(response.data[0]);
         localStorage.setItem("active_project", response.data[0]._id);
         setActiveProject(result);
       });
@@ -46,9 +49,9 @@ export default function Functionalities() {
     }
 
     await axios
-      .get<ProjectType>(`/project/${activeProjectId}`)
+      .get<ProjectEntity>(`/project/${activeProjectId}`)
       .then((response) => {
-        setActiveProject(response.data);
+        setActiveProject(new Project(response.data));
       });
   }
 
@@ -138,9 +141,9 @@ export default function Functionalities() {
               selectedStatus == -1 &&
               functionalities.map(
                 (functionality) =>
-                  functionality.project._id == activeProject?._id && (
+                  functionality.project.id == activeProject?.id && (
                     <Functionality
-                      key={functionality._id}
+                      key={functionality.id}
                       data={functionality}
                       updateState={isUpdated}
                       updateHandler={updateHandler}
@@ -151,10 +154,10 @@ export default function Functionalities() {
               selectedStatus == 0 &&
               functionalities.map(
                 (functionality) =>
-                  functionality.project._id == activeProject?._id &&
+                  functionality.project.id == activeProject?.id &&
                   functionality.status == 0 && (
                     <Functionality
-                      key={functionality._id}
+                      key={functionality.id}
                       data={functionality}
                       updateState={isUpdated}
                       updateHandler={updateHandler}
@@ -165,10 +168,10 @@ export default function Functionalities() {
               selectedStatus == 1 &&
               functionalities.map(
                 (functionality) =>
-                  functionality.project._id == activeProject?._id &&
+                  functionality.project.id == activeProject?.id &&
                   functionality.status == 1 && (
                     <Functionality
-                      key={functionality._id}
+                      key={functionality.id}
                       data={functionality}
                       updateState={isUpdated}
                       updateHandler={updateHandler}
@@ -179,10 +182,10 @@ export default function Functionalities() {
               selectedStatus == 2 &&
               functionalities.map(
                 (functionality) =>
-                  functionality.project._id == activeProject?._id &&
+                  functionality.project.id == activeProject?.id &&
                   functionality.status == 2 && (
                     <Functionality
-                      key={functionality._id}
+                      key={functionality.id}
                       data={functionality}
                       updateState={isUpdated}
                       updateHandler={updateHandler}

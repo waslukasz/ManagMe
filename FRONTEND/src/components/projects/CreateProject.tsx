@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProjectDto } from "../../types/ProjectType";
+import { ProjectDto } from "../../types/ProjectTypes";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
 import axios from "../../api/axios";
 
 export default function ProjectsCreate() {
-  const [project, setProject] = useState<ProjectDto>({
-    name: "",
-    description: "",
-  });
+  const [form, setForm] = useState<ProjectDto>(new ProjectDto());
   const [hasFailed, setHasFailed] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -18,10 +15,7 @@ export default function ProjectsCreate() {
     event.preventDefault();
 
     axios
-      .post("/project", {
-        name: project.name,
-        description: project.description,
-      })
+      .post("/project", form)
       .then(() => {
         navigate("/projects");
       })
@@ -41,9 +35,9 @@ export default function ProjectsCreate() {
           <form className="inline-flex flex-col gap-1">
             <label className="font-bold">Project name</label>
             <input
-              value={project.name}
+              value={form.name}
               onChange={(event) =>
-                setProject({ ...project, name: event.target.value })
+                setForm({ ...form, name: event.target.value })
               }
               className="rounded border border-solid p-2 border-black"
               type="text"
@@ -56,10 +50,10 @@ export default function ProjectsCreate() {
 
             <label className="font-bold mt-3">Description</label>
             <textarea
-              value={project.description ?? ""}
+              value={form.description ?? ""}
               onChange={(event) =>
-                setProject({
-                  ...project,
+                setForm({
+                  ...form,
                   description: event.target.value,
                 })
               }

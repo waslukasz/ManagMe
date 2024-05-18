@@ -13,7 +13,16 @@ export const getAllTasks = async (
   res: express.Response
 ) => {
   try {
-    const tasks = await getTasks().populate("functionality assignedUser");
+    const tasks = await getTasks()
+      .populate("functionality assignedUser")
+      .populate({
+        path: "functionality",
+        populate: { path: "project" },
+      })
+      .populate({
+        path: "functionality",
+        populate: { path: "owner" },
+      });
     return res.status(200).json(tasks);
   } catch (error) {
     console.log(error);
@@ -24,7 +33,16 @@ export const getAllTasks = async (
 export const getTask = async (req: express.Request, res: express.Response) => {
   try {
     const { id } = req.params;
-    const task = await getTaskById(id).populate("functionality assignedUser");
+    const task = await getTaskById(id)
+      .populate("functionality assignedUser")
+      .populate({
+        path: "functionality",
+        populate: { path: "project" },
+      })
+      .populate({
+        path: "functionality",
+        populate: { path: "owner" },
+      });
     if (!task) return res.sendStatus(404);
     return res.status(200).json(task);
   } catch (error) {
@@ -35,18 +53,15 @@ export const getTask = async (req: express.Request, res: express.Response) => {
 
 export const addTask = async (req: express.Request, res: express.Response) => {
   try {
-    const { name, description, functionality } = req.body;
-    const { _auth } = req.cookies;
+    const { name, description, functionality, estimated } = req.body;
 
-    if (!name || !functionality || !_auth) return res.sendStatus(400);
+    if (!name || !functionality) return res.sendStatus(400);
 
-    const user = await getUserBySessionToken(_auth);
-    const assignedUser = user._id;
     const task = await createTask({
       name,
       description,
       functionality,
-      assignedUser,
+      estimated,
     });
 
     return res.status(200).json(task).end();
@@ -75,7 +90,7 @@ export const updateTask = async (
       end,
       estimated,
       assignedUser,
-    });
+    }).populate("assignedUser");
 
     return res.status(200).json(task).end();
   } catch (error) {

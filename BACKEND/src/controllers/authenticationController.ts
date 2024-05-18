@@ -13,15 +13,7 @@ export const auth = async (req: express.Request, res: express.Response) => {
   const user = await getUserBySessionToken(_auth);
   if (!user) return res.sendStatus(400);
 
-  const response = {
-    id: user.id,
-    username: user.username,
-    name: user.name,
-    surname: user.surname,
-    roles: user.authentication.roles,
-  };
-
-  return res.status(200).json(response).end();
+  return res.status(200).json(user).end();
 };
 
 export const login = async (req: express.Request, res: express.Response) => {
@@ -53,15 +45,8 @@ export const login = async (req: express.Request, res: express.Response) => {
     user.authentication.sessionToken = token;
     await user.save();
 
-    const response = {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      surname: user.surname,
-      roles: user.authentication.roles,
-    };
-
-    return res.cookie("_auth", token).json(response).status(200).end();
+    const result = await getUserByUsername(username);
+    return res.cookie("_auth", token).json(result).status(200).end();
   } catch (error) {
     console.log(error);
     return res.sendStatus(400);

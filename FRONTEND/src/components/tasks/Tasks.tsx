@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-import TaskApi from "../../api/TaskApi";
-import { StatusType, Task as TaskType } from "../../types/TaskType";
 import Task from "./Task";
-
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
 import axios from "../../api/axios";
+import { TaskEntity, Task as TaskType } from "../../types/TaskTypes";
+import { Status } from "../../types/UtilTypes";
 
 export default function Tasks() {
   const { functionalityId } = useParams();
@@ -18,11 +16,12 @@ export default function Tasks() {
   async function fetchAllTasks() {
     setIsFetching(true);
     try {
-      await axios.get<TaskType[]>("/task").then((response) => {
-        setTasks(response.data);
-        console.log(response.data);
+      await axios.get<TaskEntity[]>("/task").then((response) => {
+        setTasks(response.data.map((entity) => new TaskType(entity)));
       });
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
     setIsFetching(false);
   }
 
@@ -68,10 +67,10 @@ export default function Tasks() {
               </div>
               {tasks.map(
                 (task) =>
-                  task.functionality._id == functionalityId &&
-                  task.status == StatusType.TODO && (
+                  task.functionality.id == functionalityId &&
+                  task.status == Status.TODO && (
                     <Task
-                      key={task._id}
+                      key={task.id}
                       data={task}
                       updateState={isUpdated}
                       updateHandler={updateHandler}
@@ -86,10 +85,10 @@ export default function Tasks() {
               </div>
               {tasks.map(
                 (task) =>
-                  task.functionality._id == functionalityId &&
-                  task.status == StatusType.DOING && (
+                  task.functionality.id == functionalityId &&
+                  task.status == Status.DOING && (
                     <Task
-                      key={task._id}
+                      key={task.id}
                       data={task}
                       updateState={isUpdated}
                       updateHandler={updateHandler}
@@ -104,10 +103,10 @@ export default function Tasks() {
               </div>
               {tasks.map(
                 (task) =>
-                  task.functionality._id == functionalityId &&
-                  task.status == StatusType.DONE && (
+                  task.functionality.id == functionalityId &&
+                  task.status == Status.DONE && (
                     <Task
-                      key={task._id}
+                      key={task.id}
                       data={task}
                       updateState={isUpdated}
                       updateHandler={updateHandler}

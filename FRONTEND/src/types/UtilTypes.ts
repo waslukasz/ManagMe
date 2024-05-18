@@ -4,7 +4,7 @@ export enum Status {
   DONE = 2,
 }
 
-export enum PriorityType {
+export enum Priority {
   LOW = 0,
   MEDIUM = 1,
   HIGH = 2,

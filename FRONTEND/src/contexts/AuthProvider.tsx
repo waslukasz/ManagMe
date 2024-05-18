@@ -1,11 +1,11 @@
 import React, { createContext, useEffect, useState } from "react";
-import { UserProfile } from "../types/UserType";
 import axios from "../api/axios";
+import { User, UserEntity } from "../types/UserTypes";
 
 type Props = { children: React.ReactNode };
 
 type AuthContextType = {
-  user: UserProfile | null;
+  user: User | null;
   isLoggedIn: boolean;
   signIn: (username: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
@@ -26,20 +26,19 @@ export const AuthProvider = ({ children }: Props) => {
     password: string
   ): Promise<boolean> => {
     await axios
-      .post("/auth/login", {
+      .post<UserEntity>("/auth/login", {
         username: username,
         password: password,
       })
       .then((response) => {
-        const user: UserProfile = { ...response.data };
-
         setData((prevState) => ({
           ...prevState,
-          user: { ...user },
+          user: new User(response.data),
           isLoggedIn: true,
         }));
         return true;
-      });
+      })
+      .catch(() => {});
     return false;
   };
 
@@ -55,12 +54,10 @@ export const AuthProvider = ({ children }: Props) => {
   useEffect(() => {
     if (!document.cookie.includes("_auth")) return;
 
-    axios.get("/auth").then((response) => {
-      const user: UserProfile = { ...response.data };
-
+    axios.get<UserEntity>("/auth").then((response) => {
       setData((prevState) => ({
         ...prevState,
-        user: { ...user },
+        user: new User(response.data),
         isLoggedIn: true,
       }));
     });

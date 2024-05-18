@@ -4,20 +4,15 @@ import EditIcon from "../../assets/edit.svg";
 import DeleteIcon from "../../assets/delete.svg";
 import BackIcon from "../../assets/back.svg";
 import Continue from "../../assets/continue.svg";
-import { StatusType, Task as TaskType } from "../../types/TaskType";
-import { User as UserType } from "../../types/UserType";
 import { format as formatDate, isValid as isDateValid } from "date-fns";
 import axios from "../../api/axios";
-
-type TaskDto = {
-  name: string;
-  description: string | null;
-  status: StatusType;
-  start: Date | null;
-  end: Date | null;
-  estimated: Date | null;
-  assignedUser: string;
-};
+import {
+  Task as TaskType,
+  TaskDtoUpdate,
+  TaskEntity,
+} from "../../types/TaskTypes";
+import { User, UserEntity } from "../../types/UserTypes";
+import { Status } from "../../types/UtilTypes";
 
 export default function Task({
   data,
@@ -29,22 +24,13 @@ export default function Task({
   updateHandler: any;
 }) {
   const [task, setTask] = useState<TaskType>(data);
-  const [form, setForm] = useState<TaskDto>({
-    name: task.name,
-    description: task.description,
-    start: task.start,
-    end: task.end,
-    estimated: task.estimated,
-    status: task.status,
-    assignedUser: task.assignedUser?._id!,
-  });
-  const [taskData, setTaskData] = useState<TaskType>(task);
+  const [form, setForm] = useState<TaskDtoUpdate>(new TaskDtoUpdate(task));
 
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(false);
 
-  const [users, setUsers] = useState<UserType[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const editStyle = {
@@ -81,8 +67,8 @@ export default function Task({
   async function fetchAllUsers() {
     setIsFetching(true);
     try {
-      axios.get<UserType[]>("/user").then((response) => {
-        setUsers(response.data);
+      axios.get<UserEntity[]>("/user").then((response) => {
+        setUsers(response.data.map((entity) => new User(entity)));
       });
     } catch (error) {}
     setIsFetching(false);
@@ -95,11 +81,11 @@ export default function Task({
     }
 
     if (!form.name || isNaN(form.status)) return;
+    if (form == new TaskDtoUpdate(task)) return;
 
-    // TODO: Dodaj sprawdzanie czy obiekt jest bez zmian, wtedy pomijamy zapytanie.
-
-    axios.patch<TaskType>(`/task/${task._id}`, form).then(() => {
-      setTask({ ...task, ...form });
+    await axios.patch<TaskEntity>(`/task/${task.id}`, form).then((response) => {
+      const result = new TaskType(response.data);
+      setTask({ ...result, ...form });
       setIsEditing(false);
       return;
     });
@@ -113,12 +99,25 @@ export default function Task({
   //   updateHandler();
   // }
 
-  async function handleProceed() {}
+  async function handleProceed() {
+    if (!isProceeding) {
+      setIsProceeding(true);
+      return;
+    }
+
+    // STAGE 1
+    if (false) {
+      axios.patch<TaskEntity>("/task", form).then((response) => {
+        const result = new TaskType(response.data);
+        setTask(result);
+        setForm(new TaskDtoUpdate(result));
+        setIsProceeding(false);
+        return;
+      });
+    }
+  }
 
   // async function proceedHandler() {
-  //   setIsProceeding((prevState) => !prevState);
-  //   if (!isProceeding) return;
-
   //   if (currentTask.assignedUser?._id == null) {
   //     setCurrentTask(
   //       await taskApi.Update({
@@ -145,7 +144,11 @@ export default function Task({
   //   }
   // }
 
-  async function handleCancel() {}
+  async function handleCancel() {
+    setForm(new TaskDtoUpdate(task));
+    setIsEditing(false);
+    setIsProceeding(false);
+  }
 
   // async function cancelHandler() {
   //   setTaskData(currentTask);
@@ -154,7 +157,11 @@ export default function Task({
   //   return;
   // }
 
-  async function handleDelete() {}
+  async function handleDelete() {
+    axios.delete(`/task/${task.id}`).then(() => {
+      updateHandler();
+    });
+  }
 
   // async function deleteHandler() {
   //   await taskApi.Delete(currentTask);
@@ -235,7 +242,7 @@ export default function Task({
           </div>
           <hr />
 
-          {isProceeding && task.assignedUser?._id == null && (
+          {isProceeding && task.assignedUser?.id == null && (
             <>
               <div>
                 <div className="flex flex-col gap-0.5 mt-2">
@@ -260,7 +267,7 @@ export default function Task({
             </>
           )}
 
-          {isProceeding && task.assignedUser?._id != null && (
+          {isProceeding && task.assignedUser && (
             <>
               <div className="mt-2 flex flex-col gap-1 text-sm">
                 <span>Click accept button to mark this task as done.</span>
@@ -315,9 +322,9 @@ export default function Task({
               <div className="flex flex-col gap-0.5 mt-2">
                 <label className="text-sm font-bold">Name</label>
                 <input
-                  value={taskData.name}
+                  value={form.name}
                   onChange={(event) =>
-                    setTaskData({ ...taskData, name: event.target.value })
+                    setForm({ ...form, name: event.target.value })
                   }
                   className="border border-solid focus:outline-none p-1 rounded"
                   type="text"
@@ -325,16 +332,16 @@ export default function Task({
                 <br />
                 <label className="text-sm font-bold">Description</label>
                 <textarea
-                  value={taskData.description ?? ""}
+                  value={form.description ?? ""}
                   onChange={(event) =>
-                    setTaskData({
-                      ...taskData,
+                    setForm({
+                      ...form,
                       description: event.target.value,
                     })
                   }
                   className="border border-solid focus:outline-none p-1 rounded"
                 />
-                {task.status != StatusType.DONE && (
+                {task.status != Status.DONE && (
                   <>
                     <br />
                     <label className="text-sm font-bold">
@@ -342,15 +349,15 @@ export default function Task({
                     </label>
                     <input
                       value={
-                        taskData.estimated
-                          ? formatDate(taskData.estimated, "yyyy-MM-dd")
+                        form.estimated
+                          ? formatDate(form.estimated, "yyyy-MM-dd")
                           : ""
                       }
                       onChange={(event) =>
                         isDateValid(
                           new Date(event.target.value)
-                            ? setTaskData({
-                                ...taskData,
+                            ? setForm({
+                                ...form,
                                 estimated: new Date(event.target.value),
                               })
                             : null

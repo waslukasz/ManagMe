@@ -1,32 +1,22 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FunctionalityDto, PriorityType } from "../../types/FunctionalityType";
 import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
 import axios from "../../api/axios";
+import { FunctionalityDtoCreate } from "../../types/FunctionalityTypes";
+import { Priority } from "../../types/UtilTypes";
 
-export default function ProjectsCreate() {
-  const [functionality, setFunctionality] = useState<FunctionalityDto>({
-    name: "",
-    description: "",
-    priority: 0,
-    project: localStorage.getItem("active_project")!,
-  });
+export default function CreateFunctionality() {
+  const [form, setForm] = useState<FunctionalityDtoCreate>(
+    new FunctionalityDtoCreate(localStorage.getItem("active_project")!)
+  );
   const [hasFailed, setHasFailed] = useState<boolean>(false);
-
-  const priorityRef = useRef<HTMLSelectElement>(null);
   const navigate = useNavigate();
 
   const handleSubmit = (event: React.MouseEvent) => {
     event.preventDefault();
-
     axios
-      .post("/functionality", {
-        name: functionality.name,
-        description: functionality.description,
-        priority: priorityRef.current?.value!,
-        project: functionality.project,
-      })
+      .post("/functionality", form)
       .then(() => {
         navigate("/functionalities");
       })
@@ -47,10 +37,10 @@ export default function ProjectsCreate() {
           <form className="inline-flex flex-col gap-1">
             <label className="font-bold">Functionality name</label>
             <input
-              value={functionality.name}
+              value={form.name}
               onChange={(event) =>
-                setFunctionality({
-                  ...functionality,
+                setForm({
+                  ...form,
                   name: event.target.value,
                 })
               }
@@ -65,10 +55,10 @@ export default function ProjectsCreate() {
 
             <label className="font-bold mt-2">Description</label>
             <textarea
-              value={functionality.description ?? ""}
+              value={form.description ?? ""}
               onChange={(event) =>
-                setFunctionality({
-                  ...functionality,
+                setForm({
+                  ...form,
                   description: event.target.value,
                 })
               }
@@ -79,14 +69,19 @@ export default function ProjectsCreate() {
 
             <label className="font-bold mt-2">Priority</label>
             <select
-              ref={priorityRef}
-              defaultValue={PriorityType.LOW}
+              value={form.priority}
+              onChange={(event) =>
+                setForm((prevState) => ({
+                  ...prevState,
+                  priority: parseInt(event.target.value),
+                }))
+              }
               name="priority"
               className="rounded border border-solid p-2 border-black"
             >
-              <option value={PriorityType.LOW}>Low</option>
-              <option value={PriorityType.MEDIUM}>Medium</option>
-              <option value={PriorityType.HIGH}>High</option>
+              <option value={Priority.LOW}>Low</option>
+              <option value={Priority.MEDIUM}>Medium</option>
+              <option value={Priority.HIGH}>High</option>
             </select>
 
             <button

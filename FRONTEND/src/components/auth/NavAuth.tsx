@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { UserDtoLogin } from "../../types/UserTypes";
 
 export default function NavAuth() {
   const auth = useAuth();
@@ -8,19 +9,19 @@ export default function NavAuth() {
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
 
-  const [loginData, setLoginData] = useState({ username: "", password: "" });
+  const [form, setLoginData] = useState<UserDtoLogin>(new UserDtoLogin());
   const [showLogin, setShowLogin] = useState<boolean>(false);
   const [loginFailed, setLoginFailed] = useState<boolean>(false);
 
   async function handleLogin() {
-    const result = await auth.signIn(loginData.username, loginData.password);
-    setLoginFailed(!result);
+    await auth.signIn(form.username, form.password);
+    setLoginFailed(!auth.isLoggedIn);
     if (from != "/") navigate(from, { replace: true });
   }
 
   async function handleLogout() {
     await auth.signOut();
-    setLoginData({ username: "", password: "" });
+    setLoginData(new UserDtoLogin());
     setLoginFailed(false);
     setShowLogin(false);
   }
@@ -54,9 +55,9 @@ export default function NavAuth() {
             <div className="text-black bg-white shadow absolute top-12 right-0 p-5 w-64 rounded font-sans">
               <label className="font-bold text-sm">Username</label>
               <input
-                value={loginData.username}
+                value={form.username}
                 onChange={(event) =>
-                  setLoginData({ ...loginData, username: event.target.value })
+                  setLoginData({ ...form, username: event.target.value })
                 }
                 type="text"
                 placeholder="Username"
@@ -64,9 +65,9 @@ export default function NavAuth() {
               />
               <label className="font-bold text-sm">Password</label>
               <input
-                value={loginData.password}
+                value={form.password}
                 onChange={(event) =>
-                  setLoginData({ ...loginData, password: event.target.value })
+                  setLoginData({ ...form, password: event.target.value })
                 }
                 type="password"
                 placeholder="********"

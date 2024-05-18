@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Project as ProjectType } from "../../types/ProjectType";
-
 import AcceptIcon from "../../assets/accept.svg";
 import EditIcon from "../../assets/edit.svg";
 import DeleteIcon from "../../assets/delete.svg";
@@ -8,11 +6,7 @@ import BackIcon from "../../assets/back.svg";
 import SelectedIcon from "../../assets/selected.svg";
 import NotSelectedIcon from "../../assets/notselected.svg";
 import axios from "../../api/axios";
-
-type ProjectDto = {
-  name: string;
-  description: string | null;
-};
+import { ProjectDto, Project as ProjectType } from "../../types/ProjectTypes";
 
 export default function Project({
   data,
@@ -24,14 +18,11 @@ export default function Project({
   updateHandler: any;
 }) {
   const [project, setProject] = useState<ProjectType>(data);
-  const [form, setForm] = useState<ProjectDto>({
-    name: project.name,
-    description: project.description,
-  });
+  const [form, setForm] = useState<ProjectDto>(new ProjectDto(project));
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isActive, setIsActive] = useState<boolean>(
-    localStorage.getItem("active_project") == project._id
+    localStorage.getItem("active_project") == project.id
   );
 
   const editStyle = {
@@ -69,7 +60,7 @@ export default function Project({
     }
 
     axios
-      .patch<ProjectType>(`/project/${project._id}`, form)
+      .patch<ProjectType>(`/project/${project.id}`, form)
       .then(() => {
         setProject({ ...project, ...form });
         setIsEditing(false);
@@ -86,14 +77,14 @@ export default function Project({
   }
 
   async function handleDelete() {
-    axios.delete(`/project/${project._id}`).then(() => {
+    axios.delete(`/project/${project.id}`).then(() => {
       if (isActive) localStorage.removeItem("active_project");
       updateHandler();
     });
   }
 
   async function handleSelect() {
-    localStorage.setItem("active_project", project._id);
+    localStorage.setItem("active_project", project.id);
     updateHandler();
   }
 
