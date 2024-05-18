@@ -22,10 +22,10 @@ export default function ProjectsCreate() {
         name: project.name,
         description: project.description,
       })
-      .then((response) => {
+      .then(() => {
         navigate("/projects");
       })
-      .catch((error) => {
+      .catch(() => {
         setHasFailed(true);
       });
   };

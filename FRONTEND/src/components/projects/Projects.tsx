@@ -21,7 +21,22 @@ export default function Projects() {
     setIsFetching(false);
   }
 
+  async function fetchActiveProjectId(): Promise<void> {
+    const activeProjectId: string | null =
+      localStorage.getItem("active_project");
+
+    let result: string = "";
+
+    if (!activeProjectId) {
+      await axios.get<ProjectType[]>("/project").then((response) => {
+        result = response.data[0]._id;
+        localStorage.setItem("active_project", response.data[0]._id);
+      });
+    }
+  }
+
   useEffect(() => {
+    fetchActiveProjectId();
     fetchAllProjects();
   }, []);
 

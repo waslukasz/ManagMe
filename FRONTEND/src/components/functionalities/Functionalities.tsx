@@ -11,7 +11,9 @@ export default function Functionalities() {
   const [functionalities, setFunctionalities] = useState<FunctionalityType[]>(
     []
   );
-  const [activeProject, setActiveProject] = useState<ProjectType>();
+  const [activeProject, setActiveProject] = useState<ProjectType>(
+    {} as ProjectType
+  );
   const [selectedStatus, setSelectedStatus] = useState<number>(-1);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [isUpdated, setIsUpdated] = useState<boolean>(true);
@@ -19,23 +21,42 @@ export default function Functionalities() {
   async function fetchAllFunctionalities() {
     setIsFetching(true);
     try {
-      await axios.get("/functionality").then((response) => {
-        setFunctionalities(response.data);
-      });
       await axios
-        .get(`/project/${localStorage.getItem("active_project")}`)
+        .get<FunctionalityType[]>("/functionality")
         .then((response) => {
-          setActiveProject(response.data);
+          setFunctionalities(response.data);
         });
     } catch (error) {}
     setIsFetching(false);
   }
 
-  useEffect(() => {
-    if (!localStorage.getItem("active_project"))
-      axios.get("/project").then((result) => {
-        localStorage.setItem("active_project", result.data[0]._id);
+  async function fetchActiveProject(): Promise<void> {
+    const activeProjectId: string | null =
+      localStorage.getItem("active_project");
+
+    let result: ProjectType = {} as ProjectType;
+
+    if (!activeProjectId) {
+      await axios.get<ProjectType[]>("/project").then((response) => {
+        result = response.data[0];
+        localStorage.setItem("active_project", response.data[0]._id);
+        setActiveProject(result);
       });
+      return;
+    }
+
+    await axios
+      .get<ProjectType>(`/project/${activeProjectId}`)
+      .then((response) => {
+        setActiveProject(response.data);
+      });
+  }
+
+  useEffect(() => {
+    fetchActiveProject();
+  });
+
+  useEffect(() => {
     fetchAllFunctionalities();
     if (!isUpdated) setIsUpdated(true);
   }, [isUpdated]);

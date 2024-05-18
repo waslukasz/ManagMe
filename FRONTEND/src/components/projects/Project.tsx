@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Project as ProjectType } from "../../types/ProjectType";
 
 import AcceptIcon from "../../assets/accept.svg";
@@ -8,6 +8,11 @@ import BackIcon from "../../assets/back.svg";
 import SelectedIcon from "../../assets/selected.svg";
 import NotSelectedIcon from "../../assets/notselected.svg";
 import axios from "../../api/axios";
+
+type ProjectDto = {
+  name: string;
+  description: string | null;
+};
 
 export default function Project({
   data,
@@ -19,7 +24,10 @@ export default function Project({
   updateHandler: any;
 }) {
   const [project, setProject] = useState<ProjectType>(data);
-  const [projectEdited, setProjectEdited] = useState<ProjectType>(project);
+  const [form, setForm] = useState<ProjectDto>({
+    name: project.name,
+    description: project.description,
+  });
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isActive, setIsActive] = useState<boolean>(
@@ -47,47 +55,47 @@ export default function Project({
       "invert(79%) sepia(34%) saturate(1323%) hue-rotate(329deg) brightness(104%) contrast(97%)",
   };
 
-  async function editHandler() {
-    if (projectEdited.name == "") return;
-    setIsEditing((prevState) => !prevState);
-    if (!isEditing) return;
-    await axios
-      .patch(`/project/${project._id}`, {
-        name: projectEdited.name,
-        description: projectEdited.description,
+  async function handleUpdate() {
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+
+    if (!form.name) return;
+
+    if (form.name == project.name && form.description == form.description) {
+      setIsEditing(false);
+      return;
+    }
+
+    axios
+      .patch<ProjectType>(`/project/${project._id}`, form)
+      .then(() => {
+        setProject({ ...project, ...form });
+        setIsEditing(false);
       })
-      .then((response) => {
-        setProject(response.data);
-        updateHandler();
-      })
-      .catch((error) => {});
+      .catch(() => {});
   }
 
-  async function cancelEditHandler() {
-    setProjectEdited(project);
-    setIsEditing((prevState) => !prevState);
-    return;
+  async function handleCancel() {
+    setForm({
+      name: project.name,
+      description: project.description,
+    });
+    setIsEditing(false);
   }
 
-  async function deleteHandler() {
-    await axios.delete(`/project/${project._id}`).then((response) => {
-      updateHandler();
+  async function handleDelete() {
+    axios.delete(`/project/${project._id}`).then(() => {
       if (isActive) localStorage.removeItem("active_project");
+      updateHandler();
     });
   }
 
-  async function selectHandler() {
-    console.log(project._id);
+  async function handleSelect() {
     localStorage.setItem("active_project", project._id);
     updateHandler();
   }
-
-  useEffect(() => {
-    if (!localStorage.getItem("active_project"))
-      axios.get("/project").then((result) => {
-        localStorage.setItem("active_project", result.data[0]._id);
-      });
-  });
 
   return (
     <>
@@ -109,7 +117,7 @@ export default function Project({
           {!isActive && (
             <img
               className="h-4 cursor-pointer mr-auto self-start select-none"
-              onClick={selectHandler}
+              onClick={handleSelect}
               style={selectedStyle}
               src={NotSelectedIcon}
               alt="Selected"
@@ -123,14 +131,14 @@ export default function Project({
                 style={editStyle}
                 src={EditIcon}
                 alt="Edit"
-                onClick={editHandler}
+                onClick={handleUpdate}
               />
               <img
                 className="h-5 cursor-pointer"
                 style={deleteStyle}
                 src={DeleteIcon}
                 alt="Delete"
-                onClick={deleteHandler}
+                onClick={handleDelete}
               />
             </>
           )}
@@ -142,14 +150,14 @@ export default function Project({
                 style={acceptStyle}
                 src={AcceptIcon}
                 alt="Accept"
-                onClick={editHandler}
+                onClick={handleUpdate}
               />
               <img
                 className="h-5 cursor-pointer"
                 style={backStyle}
                 src={BackIcon}
                 alt="Cancel"
-                onClick={cancelEditHandler}
+                onClick={handleCancel}
               />
             </>
           )}
@@ -168,10 +176,10 @@ export default function Project({
               Project name
             </label>
             <input
-              value={projectEdited.name}
+              value={form.name}
               onChange={(event) =>
-                setProjectEdited({
-                  ...projectEdited,
+                setForm({
+                  ...form,
                   name: event.target.value,
                 })
               }
@@ -181,10 +189,10 @@ export default function Project({
             <br />
             <label className="select-none text-sm font-bold">Description</label>
             <textarea
-              value={projectEdited.description ?? ""}
+              value={form.description ?? ""}
               onChange={(event) =>
-                setProjectEdited({
-                  ...projectEdited,
+                setForm({
+                  ...form,
                   description: event.target.value,
                 })
               }

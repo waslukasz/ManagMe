@@ -1,5 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Functionality as FunctionalityType } from "../../types/FunctionalityType";
+import { useEffect, useState } from "react";
+import {
+  Functionality as FunctionalityType,
+  PriorityType,
+  StatusType,
+} from "../../types/FunctionalityType";
 
 import AcceptIcon from "../../assets/accept.svg";
 import EditIcon from "../../assets/edit.svg";
@@ -9,7 +13,12 @@ import { Link } from "react-router-dom";
 import { format as formatDate } from "date-fns";
 import axios from "../../api/axios";
 
-//TODO : GODZINY FORMAT 24H
+type FunctionalityDto = {
+  name: string;
+  description: string | null;
+  priority: PriorityType;
+  status: StatusType;
+};
 
 export default function Functionality({
   data,
@@ -21,8 +30,12 @@ export default function Functionality({
   updateHandler: any;
 }) {
   const [functionality, setFunctionality] = useState<FunctionalityType>(data);
-  const [functionalityEdited, setFunctionalityEdited] =
-    useState<FunctionalityType>(functionality);
+  const [form, setForm] = useState<FunctionalityDto>({
+    name: functionality.name,
+    description: functionality.description,
+    priority: functionality.priority,
+    status: functionality.status,
+  });
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -43,35 +56,46 @@ export default function Functionality({
       "invert(32%) sepia(72%) saturate(552%) hue-rotate(150deg) brightness(95%) contrast(85%)",
   };
 
-  const priorityRef = useRef<HTMLSelectElement>(null);
-  const statusRef = useRef<HTMLSelectElement>(null);
-
   useEffect(() => {}, [updateState]);
 
-  async function editHandler() {
-    if (functionalityEdited.name == "") return;
-    setIsEditing((prevState) => !prevState);
-    if (!isEditing) return;
-    await axios
-      .patch(`/functionality/${functionality._id}`, {
-        name: functionalityEdited.name,
-        description: functionalityEdited.description,
-        priority: parseInt(priorityRef.current?.value!),
-        status: parseInt(statusRef.current?.value!),
-      })
+  async function handleUpdate() {
+    if (!isEditing) {
+      setIsEditing(true);
+      return;
+    }
+    if (!form.name || isNaN(form.priority) || isNaN(form.status)) return;
+
+    if (
+      form.name == functionality.name &&
+      form.description == functionality.description &&
+      form.status == functionality.status &&
+      form.priority == functionality.priority
+    ) {
+      setIsEditing(false);
+      return;
+    }
+
+    axios
+      .patch<FunctionalityType>(`/functionality/${functionality._id}`, form)
       .then(() => {
-        updateHandler();
-      });
+        setFunctionality({ ...functionality, ...form });
+        setIsEditing(false);
+      })
+      .catch(() => {});
   }
 
-  async function cancelEditHandler() {
-    setFunctionalityEdited(functionality);
-    setIsEditing((prevState) => !prevState);
-    return;
+  async function handleCancel() {
+    setForm({
+      name: functionality.name,
+      description: functionality.description,
+      priority: functionality.priority,
+      status: functionality.status,
+    });
+    setIsEditing(false);
   }
 
-  async function deleteHandler() {
-    await axios.delete(`/functionality/${functionality._id}`).then(() => {
+  async function handleDelete() {
+    axios.delete(`/functionality/${functionality._id}`).then(() => {
       updateHandler();
     });
   }
@@ -87,14 +111,14 @@ export default function Functionality({
                 style={editStyle}
                 src={EditIcon}
                 alt="Edit"
-                onClick={editHandler}
+                onClick={handleUpdate}
               />
               <img
                 className="h-5 cursor-pointer"
                 style={deleteStyle}
                 src={DeleteIcon}
                 alt="Delete"
-                onClick={deleteHandler}
+                onClick={handleDelete}
               />
             </>
           )}
@@ -106,14 +130,14 @@ export default function Functionality({
                 style={acceptStyle}
                 src={AcceptIcon}
                 alt="Accept"
-                onClick={editHandler}
+                onClick={handleUpdate}
               />
               <img
                 className="h-5 cursor-pointer"
                 style={backStyle}
                 src={BackIcon}
                 alt="Cancel"
-                onClick={cancelEditHandler}
+                onClick={handleCancel}
               />
             </>
           )}
@@ -152,7 +176,7 @@ export default function Functionality({
                 <span className="text-xs text-right italic">
                   {formatDate(
                     new Date(functionality.created),
-                    "hh:mm:ss - dd MMMM yyyy"
+                    "kk:mm:ss - dd MMMM yyyy"
                   )}
                 </span>
                 <Link
@@ -171,10 +195,10 @@ export default function Functionality({
             <div className="flex flex-col mt-2">
               <label className="text-sm font-bold">Functionality name</label>
               <input
-                value={functionalityEdited.name}
+                value={form.name}
                 onChange={(event) =>
-                  setFunctionalityEdited({
-                    ...functionalityEdited,
+                  setForm({
+                    ...form,
                     name: event.target.value,
                   })
                 }
@@ -184,10 +208,10 @@ export default function Functionality({
 
               <label className="text-sm font-bold mt-2">Description</label>
               <textarea
-                value={functionalityEdited.description ?? ""}
+                value={form.description ?? ""}
                 onChange={(event) =>
-                  setFunctionalityEdited({
-                    ...functionalityEdited,
+                  setForm({
+                    ...form,
                     description: event.target.value,
                   })
                 }
@@ -196,8 +220,10 @@ export default function Functionality({
 
               <label className="text-sm font-bold mt-2">Priority</label>
               <select
-                ref={priorityRef}
-                defaultValue={functionality.priority}
+                value={form.priority}
+                onChange={(event) =>
+                  setForm({ ...form, priority: parseInt(event?.target.value) })
+                }
                 className="rounded border border-solid border-black"
               >
                 <option value="0">Low</option>
@@ -207,9 +233,10 @@ export default function Functionality({
 
               <label className="text-sm font-bold mt-2">Status:</label>
               <select
-                ref={statusRef}
-                defaultValue={functionality.status}
-                name="status"
+                value={form.status}
+                onChange={(event) =>
+                  setForm({ ...form, status: parseInt(event?.target.value) })
+                }
                 className="rounded border border-solid border-black"
               >
                 <option value="0">TODO</option>

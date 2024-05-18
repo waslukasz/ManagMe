@@ -75,8 +75,6 @@ export const updateFunctionality = async (
   try {
     const { name, description, priority, status } = req.body;
     const { id } = req.params;
-    const { _auth } = req.cookies;
-    const owner = (jwt.verify(_auth, process.env.JWT_SECRET) as IToken).id;
 
     if (!name) return res.sendStatus(400);
 

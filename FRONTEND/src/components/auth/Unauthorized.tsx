@@ -7,6 +7,6 @@ export default function Unauthorized() {
   return auth?.user ? (
     <Navigate to={"/"} />
   ) : (
-    <div>Please login to continue.</div>
+    <div className="text-2xl m-3">Please login to continue.</div>
   );
 }

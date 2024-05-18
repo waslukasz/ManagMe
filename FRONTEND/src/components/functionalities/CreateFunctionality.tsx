@@ -27,10 +27,10 @@ export default function ProjectsCreate() {
         priority: priorityRef.current?.value!,
         project: functionality.project,
       })
-      .then((response) => {
+      .then(() => {
         navigate("/functionalities");
       })
-      .catch((error) => {
+      .catch(() => {
         setHasFailed(true);
       });
   };
