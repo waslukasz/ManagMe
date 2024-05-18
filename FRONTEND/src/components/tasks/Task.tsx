@@ -1,14 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import AcceptIcon from "../../assets/accept.svg";
 import EditIcon from "../../assets/edit.svg";
 import DeleteIcon from "../../assets/delete.svg";
 import BackIcon from "../../assets/back.svg";
 import Continue from "../../assets/continue.svg";
-import TaskApi from "../../api/TaskApi";
 import { StatusType, Task as TaskType } from "../../types/TaskType";
 import { User as UserType } from "../../types/UserType";
-import AuthApi from "../../api/AuthApi";
 import { format as formatDate, isValid as isDateValid } from "date-fns";
+import axios from "../../api/axios";
+
+type TaskDto = {
+  name: string;
+  description: string | null;
+  status: StatusType;
+  start: Date | null;
+  end: Date | null;
+  estimated: Date | null;
+  assignedUser: string;
+};
 
 export default function Task({
   data,
@@ -19,15 +28,22 @@ export default function Task({
   updateState: any;
   updateHandler: any;
 }) {
-  const taskApi = new TaskApi();
-  const [currentTask, setCurrentTask] = useState<TaskType>(data);
-  const [taskData, setTaskData] = useState<TaskType>(currentTask);
+  const [task, setTask] = useState<TaskType>(data);
+  const [form, setForm] = useState<TaskDto>({
+    name: task.name,
+    description: task.description,
+    start: task.start,
+    end: task.end,
+    estimated: task.estimated,
+    status: task.status,
+    assignedUser: task.assignedUser?._id!,
+  });
+  const [taskData, setTaskData] = useState<TaskType>(task);
 
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(false);
 
-  const authApi = new AuthApi();
   const [users, setUsers] = useState<UserType[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -56,73 +72,95 @@ export default function Task({
       "invert(90%) sepia(30%) saturate(430%) hue-rotate(12deg) brightness(89%) contrast(94%)",
   };
 
-  const assignedUserRef = useRef<HTMLSelectElement>(null);
-
   useEffect(() => {}, [updateState]);
 
   useEffect(() => {
-    fetchAllUsernames();
+    fetchAllUsers();
   }, []);
 
-  async function fetchAllUsernames() {
+  async function fetchAllUsers() {
     setIsFetching(true);
     try {
-      let users = await authApi.GetAll();
-      setUsers(users);
+      axios.get<UserType[]>("/user").then((response) => {
+        setUsers(response.data);
+      });
     } catch (error) {}
     setIsFetching(false);
   }
 
-  async function editHandler() {
-    if (taskData.name == "") return;
-    setIsEditing((prevState) => !prevState);
-    if (!isEditing) return;
-    setCurrentTask(await taskApi.Update(taskData));
-    updateHandler();
-  }
-
-  async function proceedHandler() {
-    setIsProceeding((prevState) => !prevState);
-    if (!isProceeding) return;
-
-    if (currentTask.assignedUserId == null) {
-      setCurrentTask(
-        await taskApi.Update({
-          ...taskData,
-          assignedUserId: assignedUserRef.current?.value!,
-          status: StatusType.DOING,
-          startTime: new Date(),
-        })
-      );
-      updateHandler();
+  async function handleUpdate() {
+    if (!isEditing) {
+      setIsEditing(true);
       return;
     }
 
-    if (currentTask.endTime == null) {
-      setCurrentTask(
-        await taskApi.Update({
-          ...taskData,
-          endTime: new Date(),
-          status: StatusType.DONE,
-        })
-      );
-      updateHandler();
+    if (!form.name || isNaN(form.status)) return;
+
+    // TODO: Dodaj sprawdzanie czy obiekt jest bez zmian, wtedy pomijamy zapytanie.
+
+    axios.patch<TaskType>(`/task/${task._id}`, form).then(() => {
+      setTask({ ...task, ...form });
+      setIsEditing(false);
       return;
-    }
+    });
   }
 
-  async function cancelHandler() {
-    setTaskData(currentTask);
-    setIsProceeding(false);
-    setIsEditing(false);
-    return;
-  }
+  // async function editHandler() {
+  //   if (taskData.name == "") return;
+  //   setIsEditing((prevState) => !prevState);
+  //   if (!isEditing) return;
+  //   setCurrentTask(await taskApi.Update(taskData));
+  //   updateHandler();
+  // }
 
-  async function deleteHandler() {
-    await taskApi.Delete(currentTask);
-    setIsDeleted(true);
-    updateHandler();
-  }
+  async function handleProceed() {}
+
+  // async function proceedHandler() {
+  //   setIsProceeding((prevState) => !prevState);
+  //   if (!isProceeding) return;
+
+  //   if (currentTask.assignedUser?._id == null) {
+  //     setCurrentTask(
+  //       await taskApi.Update({
+  //         ...taskData,
+  //         assignedUser: assignedUserRef.current?.value!,
+  //         status: StatusType.DOING,
+  //         startTime: new Date(),
+  //       })
+  //     );
+  //     updateHandler();
+  //     return;
+  //   }
+
+  //   if (currentTask.endTime == null) {
+  //     setCurrentTask(
+  //       await taskApi.Update({
+  //         ...taskData,
+  //         endTime: new Date(),
+  //         status: StatusType.DONE,
+  //       })
+  //     );
+  //     updateHandler();
+  //     return;
+  //   }
+  // }
+
+  async function handleCancel() {}
+
+  // async function cancelHandler() {
+  //   setTaskData(currentTask);
+  //   setIsProceeding(false);
+  //   setIsEditing(false);
+  //   return;
+  // }
+
+  async function handleDelete() {}
+
+  // async function deleteHandler() {
+  //   await taskApi.Delete(currentTask);
+  //   setIsDeleted(true);
+  //   updateHandler();
+  // }
 
   return (
     <>
@@ -131,13 +169,13 @@ export default function Task({
           <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2">
             {!isEditing && !isProceeding && (
               <>
-                {currentTask.endTime == null && (
+                {task.end == null && (
                   <img
                     className="h-5 cursor-pointer"
                     style={proceedStyle}
                     src={Continue}
                     alt="Continue"
-                    onClick={proceedHandler}
+                    onClick={handleProceed}
                   />
                 )}
                 <img
@@ -145,14 +183,14 @@ export default function Task({
                   style={editStyle}
                   src={EditIcon}
                   alt="Edit"
-                  onClick={editHandler}
+                  onClick={handleUpdate}
                 />
                 <img
                   className="h-5 cursor-pointer"
                   style={deleteStyle}
                   src={DeleteIcon}
                   alt="Delete"
-                  onClick={deleteHandler}
+                  onClick={handleDelete}
                 />
               </>
             )}
@@ -164,14 +202,14 @@ export default function Task({
                   style={acceptStyle}
                   src={AcceptIcon}
                   alt="Accept"
-                  onClick={editHandler}
+                  onClick={handleUpdate}
                 />
                 <img
                   className="h-5 cursor-pointer"
                   style={backStyle}
                   src={BackIcon}
                   alt="Cancel"
-                  onClick={cancelHandler}
+                  onClick={handleCancel}
                 />
               </>
             )}
@@ -183,29 +221,26 @@ export default function Task({
                   style={acceptProceedStyle}
                   src={AcceptIcon}
                   alt="Accept"
-                  onClick={proceedHandler}
+                  onClick={handleProceed}
                 />
                 <img
                   className="h-5 cursor-pointer"
                   style={backStyle}
                   src={BackIcon}
                   alt="Cancel"
-                  onClick={cancelHandler}
+                  onClick={handleCancel}
                 />
               </>
             )}
           </div>
           <hr />
 
-          {isProceeding && currentTask.assignedUserId == null && (
+          {isProceeding && task.assignedUser?._id == null && (
             <>
               <div>
                 <div className="flex flex-col gap-0.5 mt-2">
                   <label className="font-bold text-sm">Assign user</label>
-                  <select
-                    ref={assignedUserRef}
-                    className="border border-solid rounded focus:outline-none p-0.5"
-                  >
+                  <select className="border border-solid rounded focus:outline-none p-0.5">
                     {!isFetching && (
                       <>
                         {users.map((user) => (
@@ -225,7 +260,7 @@ export default function Task({
             </>
           )}
 
-          {isProceeding && currentTask.assignedUserId != null && (
+          {isProceeding && task.assignedUser?._id != null && (
             <>
               <div className="mt-2 flex flex-col gap-1 text-sm">
                 <span>Click accept button to mark this task as done.</span>
@@ -240,51 +275,36 @@ export default function Task({
           {!isEditing && (
             <>
               <div className="flex flex-col">
-                <span className="text-xl font-bold">{currentTask.name}</span>
-                <span className="mt-1">{currentTask.description}</span>
+                <span className="text-xl font-bold">{task.name}</span>
+                <span className="mt-1">{task.description}</span>
                 <hr className="mt-3" />
                 <span className="text-xs italic">
-                  Status: {currentTask.status == 0 && <>TODO</>}{" "}
-                  {currentTask.status == 1 && <>Doing</>}
-                  {currentTask.status == 2 && <>Done</>}
+                  Status: {task.status == 0 && <>TODO</>}{" "}
+                  {task.status == 1 && <>Doing</>}
+                  {task.status == 2 && <>Done</>}
                 </span>
                 <span className="text-xs italic">
                   Started:{" "}
-                  {currentTask.startTime
-                    ? formatDate(currentTask.startTime, "dd/MM/yyyy")
-                    : "-"}
+                  {task.start ? formatDate(task.start, "dd/MM/yyyy") : "-"}
                 </span>
                 <span className="text-xs italic">
                   Finished:{" "}
-                  {currentTask.endTime
-                    ? formatDate(currentTask.endTime, "dd/MM/yyyy")
-                    : "-"}
+                  {task.end ? formatDate(task.end, "dd/MM/yyyy") : "-"}
                 </span>
-                {currentTask.endTime == null && (
+                {task.end == null && (
                   <span className="text-xs italic">
                     Estimated finish time:{" "}
-                    {currentTask.estimatedTime
-                      ? formatDate(currentTask.estimatedTime, "dd/MM/yyyy")
+                    {task.estimated
+                      ? formatDate(task.estimated, "dd/MM/yyyy")
                       : "-"}
                   </span>
                 )}
                 <span className="text-xs italic">
-                  Assigned user:{" "}
-                  {updateState && currentTask.assignedUserId
-                    ? `${
-                        users.find((u) => u.id == currentTask.assignedUserId)
-                          ?.name
-                      } ${
-                        users.find((u) => u.id == currentTask.assignedUserId)
-                          ?.surname
-                      }`
-                    : "not assigned"}
+                  Assigned user: {task.assignedUser?.name}{" "}
+                  {task.assignedUser?.surname}
                 </span>
                 <span className="text-xs text-right italic">
-                  {formatDate(
-                    currentTask.createdTimestamp,
-                    "hh:mm:ss - dd MMMM yyyy"
-                  )}
+                  {formatDate(task.created, "kk:mm:ss - dd MMMM yyyy")}
                 </span>
               </div>
             </>
@@ -314,7 +334,7 @@ export default function Task({
                   }
                   className="border border-solid focus:outline-none p-1 rounded"
                 />
-                {currentTask.status != StatusType.DONE && (
+                {task.status != StatusType.DONE && (
                   <>
                     <br />
                     <label className="text-sm font-bold">
@@ -322,8 +342,8 @@ export default function Task({
                     </label>
                     <input
                       value={
-                        taskData.estimatedTime
-                          ? formatDate(taskData.estimatedTime, "yyyy-MM-dd")
+                        taskData.estimated
+                          ? formatDate(taskData.estimated, "yyyy-MM-dd")
                           : ""
                       }
                       onChange={(event) =>
@@ -331,7 +351,7 @@ export default function Task({
                           new Date(event.target.value)
                             ? setTaskData({
                                 ...taskData,
-                                estimatedTime: new Date(event.target.value),
+                                estimated: new Date(event.target.value),
                               })
                             : null
                         )

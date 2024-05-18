@@ -15,6 +15,16 @@ export type UserProfile = {
   roles: Array<string>;
 };
 
+export type UserDb = {
+  _id: string;
+  username: string;
+  name: string;
+  surname: string;
+  authentication: {
+    roles: Array<string>;
+  };
+};
+
 export enum Role {
   Admin = 0,
   DevOps = 1,

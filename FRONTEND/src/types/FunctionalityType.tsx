@@ -1,4 +1,5 @@
 import { Project } from "./ProjectType";
+import { UserDb } from "./UserType";
 
 export type Functionality = {
   _id: string;
@@ -7,25 +8,15 @@ export type Functionality = {
   priority: PriorityType;
   status: StatusType;
   project: Project;
-  owner: FunctionalityOwner;
+  owner: UserDb;
   created: Date;
-};
-
-export type FunctionalityOwner = {
-  _id: string;
-  username: string;
-  name: string;
-  surname: string;
-  authentication: {
-    roles: Array<string>;
-  };
 };
 
 export type FunctionalityDto = {
   name: string;
   description: string | null;
   priority: PriorityType;
-  project: string;
+  status: StatusType;
 };
 
 export enum StatusType {

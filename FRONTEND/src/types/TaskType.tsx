@@ -1,25 +1,32 @@
+import { Functionality } from "./FunctionalityType";
+import { UserDb, UserProfile } from "./UserType";
+
 export type Task = {
-    id:string,
-    name:string,
-    description:string|null,
-    functionalityId:string
-    status:StatusType,
-    createdTimestamp:Date,
-    startTime: Date|null,
-    endTime: Date|null,
-    estimatedTime: Date|null,
-    assignedUserId:string|null
-}
+  _id: string;
+  name: string;
+  description: string | null;
+  status: StatusType;
+  created: Date;
+  start: Date | null;
+  end: Date | null;
+  estimated: Date | null;
+  functionality: Functionality;
+  assignedUser: UserDb | null;
+};
 
 export type TaskDto = {
-    name:string,
-    description:string|null,
-    functionalityId:string
-    estimatedTime: Date|null,
-}
+  name: string;
+  description: string | null;
+  start: Date | null;
+  end: Date | null;
+  estimated: Date | null;
+  assignedUser: UserProfile | null;
+};
+
+export type TaskEntity = {};
 
 export enum StatusType {
-    TODO = 0,
-    DOING = 1,
-    DONE = 2
+  TODO = 0,
+  DOING = 1,
+  DONE = 2,
 }
