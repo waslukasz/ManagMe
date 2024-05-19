@@ -16,7 +16,7 @@ export class User {
   name: string;
   surname: string;
   fullname: string;
-  roles: Array<UserRole>;
+  roles: Array<string>;
 
   constructor(entity?: UserEntity) {
     if (entity) {
@@ -25,7 +25,7 @@ export class User {
       this.name = entity.name;
       this.surname = entity.surname;
       this.fullname = `${entity.name} ${entity.surname}`;
-      this.roles = entity.authentication.roles;
+      this.roles = entity.authentication.roles.map((role) => role.toString());
     } else {
       this.id = "";
       this.username = "";

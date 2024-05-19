@@ -16,7 +16,8 @@ import {
 import axios from "../../api/axios";
 import { format as formatDate, isValid as isDateValid } from "date-fns";
 import { Status } from "../../types/UtilTypes";
-import { User, UserEntity } from "../../types/UserTypes";
+import { User, UserEntity, UserRole } from "../../types/UserTypes";
+import useAuth from "../../hooks/useAuth";
 
 export default function Task({
   data,
@@ -28,6 +29,8 @@ export default function Task({
   const [task, setTask] = useState<TaskType>(data);
   const [tasks, setTasks] = tasksState;
   const [users, setUsers] = useState<User[]>({} as User[]);
+
+  const auth = useAuth();
 
   const [formUpdate, setFormUpdate] = useState<TaskDtoUpdate>(
     new TaskDtoUpdate(task)
@@ -128,10 +131,18 @@ export default function Task({
             <>
               {!task.end && (
                 <>
-                  <ContinueIcon
-                    className="fill-cyan-600 hover:fill-cyan-700"
-                    onClick={handleProceed}
-                  />
+                  {((auth.user?.roles.some(
+                    (role) =>
+                      role == UserRole[UserRole.Admin] ||
+                      role == UserRole[UserRole.Devops]
+                  ) &&
+                    !task.assignedUser?.id) ||
+                    auth.user?.id == task.assignedUser?.id) && (
+                    <ContinueIcon
+                      className="fill-cyan-600 hover:fill-cyan-700"
+                      onClick={handleProceed}
+                    />
+                  )}
                   <EditIcon
                     className="fill-cyan-600 hover:fill-cyan-700"
                     onClick={handleUpdate}
@@ -365,7 +376,7 @@ export default function Task({
                 </>
               )}
               {/* Proceed -> Stage 2 (set end date, change status to Done) */}
-              {isProceeding && !task.end && (
+              {isProceeding && !task.end && task.assignedUser?.id && (
                 <>
                   <span className="font-semibold leading-6">
                     Submit to mark current task as finished.
