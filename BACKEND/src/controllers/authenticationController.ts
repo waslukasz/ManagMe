@@ -11,7 +11,7 @@ export const auth = async (req: express.Request, res: express.Response) => {
   const { _auth } = req.cookies;
   if (!_auth) return res.sendStatus(400);
   const user = await getUserBySessionToken(_auth);
-  if (!user) return res.sendStatus(400);
+  if (!user) return res.clearCookie("_auth").sendStatus(400);
 
   return res.status(200).json(user).end();
 };
