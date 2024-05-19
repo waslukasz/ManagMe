@@ -6,7 +6,7 @@ import SubNavLink from "../navigation/SubNavLink";
 import { TaskDtoCreate } from "../../types/TaskTypes";
 import axios from "../../api/axios";
 
-export default function ProjectsCreate() {
+export default function CreateTask() {
   const { functionalityId } = useParams();
 
   const [form, setForm] = useState<TaskDtoCreate>(
@@ -18,7 +18,6 @@ export default function ProjectsCreate() {
 
   const handleSubmit = (event: React.MouseEvent) => {
     event.preventDefault();
-    console.log(form);
     axios
       .post("/task", form)
       .then(() => {
@@ -33,13 +32,13 @@ export default function ProjectsCreate() {
     <>
       <div className="flex flex-col">
         <SubNavigation>
-          <SubNavLink to={"/projects"} label="Go to projects" />
-          <SubNavLink to={"/functionalities"} label="Go to functionalities" />
-          <SubNavLink to={"/tasks/" + functionalityId} label="Go to tasks" />
+          <SubNavLink to={"/projects"} label="Projects" />
+          <SubNavLink to={"/functionalities"} label="Functionalities" />
+          <SubNavLink to={"/tasks/" + functionalityId} label="Tasks" />
         </SubNavigation>
 
-        <div className="flex justify-center mt-7 font-sans">
-          <form className="inline-flex flex-col gap-1">
+        <div className="flex justify-center font-sans">
+          <form className="inline-flex bg-gray-100 p-7 rounded-b flex-col gap-1">
             <label className="font-bold">Task name</label>
             <input
               required

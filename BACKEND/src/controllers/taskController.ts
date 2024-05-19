@@ -80,8 +80,6 @@ export const updateTask = async (
       req.body;
     const { id } = req.params;
 
-    if (!name) return res.sendStatus(400);
-
     const task = await updateTaskById(id, {
       name,
       description,

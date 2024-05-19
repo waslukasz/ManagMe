@@ -72,7 +72,6 @@ export class TaskDtoCreate {
 export class TaskDtoUpdate {
   name: string;
   description: string | null;
-  status: Status;
   start: Date | null;
   end: Date | null;
   estimated: Date | null;
@@ -81,17 +80,39 @@ export class TaskDtoUpdate {
     if (entity) {
       this.name = entity.name;
       this.description = entity.description;
-      this.status = entity.status;
       this.start = entity.start;
       this.end = entity.end;
       this.estimated = entity.estimated;
     } else {
       this.name = "";
       this.description = "";
-      this.status = 0;
       this.start = null;
       this.end = null;
       this.estimated = null;
+    }
+  }
+}
+
+export class TaskDtoProceed {
+  assignedUser: string | null;
+  start: Date | null;
+  end: Date | null;
+  estimated: Date | null;
+  status: Status;
+
+  constructor(entity?: Task) {
+    if (entity) {
+      this.assignedUser = entity.assignedUser?.id ?? "";
+      this.start = entity.start;
+      this.end = entity.end;
+      this.estimated = entity.estimated;
+      this.status = entity.status;
+    } else {
+      this.assignedUser = "";
+      this.start = null;
+      this.end = null;
+      this.estimated = null;
+      this.status = 0;
     }
   }
 }

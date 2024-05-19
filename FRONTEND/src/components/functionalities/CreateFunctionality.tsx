@@ -79,9 +79,9 @@ export default function CreateFunctionality() {
               name="priority"
               className="rounded border border-solid p-2 border-black"
             >
-              <option value={Priority.LOW}>Low</option>
-              <option value={Priority.MEDIUM}>Medium</option>
-              <option value={Priority.HIGH}>High</option>
+              <option value={Priority.Low}>Low</option>
+              <option value={Priority.Medium}>Medium</option>
+              <option value={Priority.High}>High</option>
             </select>
 
             <button

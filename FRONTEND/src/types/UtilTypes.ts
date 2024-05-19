@@ -1,11 +1,11 @@
 export enum Status {
-  TODO = 0,
-  DOING = 1,
-  DONE = 2,
+  Todo = 0,
+  Doing = 1,
+  Done = 2,
 }
 
 export enum Priority {
-  LOW = 0,
-  MEDIUM = 1,
-  HIGH = 2,
+  Low = 0,
+  Medium = 1,
+  High = 2,
 }
