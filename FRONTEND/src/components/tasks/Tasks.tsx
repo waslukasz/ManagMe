@@ -15,7 +15,11 @@ export default function Tasks() {
     setIsFetching(true);
     try {
       await axios.get<TaskEntity[]>("/task").then((response) => {
-        setTasks(response.data.map((entity) => new TaskType(entity)));
+        setTasks(
+          response.data
+            .filter((entity) => entity.functionality._id == functionalityId)
+            .map((entity) => new TaskType(entity))
+        );
       });
     } catch (error) {
       console.log(error);

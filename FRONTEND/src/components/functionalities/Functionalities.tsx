@@ -9,18 +9,17 @@ import SubNavigation from "../navigation/SubNavigation";
 import SubNavLink from "../navigation/SubNavLink";
 import axios from "../../api/axios";
 import { Project, ProjectEntity } from "../../types/ProjectTypes";
+import axiosFull, { AxiosError } from "axios";
 
 export default function Functionalities() {
   const [functionalities, setFunctionalities] = useState<FunctionalityType[]>(
     []
   );
-  const [activeProject, setActiveProject] = useState<Project>(new Project());
+  const [activeProject, setActiveProject] = useState<Project>();
   const [selectedStatus, setSelectedStatus] = useState<number>(-1);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [isUpdated, setIsUpdated] = useState<boolean>(true);
 
   async function fetchAllFunctionalities() {
-    setIsFetching(true);
     try {
       await axios
         .get<FunctionalityEntity[]>("/functionality")
@@ -30,43 +29,38 @@ export default function Functionalities() {
           );
         });
     } catch (error) {}
-    setIsFetching(false);
   }
 
   async function fetchActiveProject(): Promise<void> {
     const activeProjectId: string | null =
       localStorage.getItem("active_project");
 
-    let result: Project = {} as Project;
-
     if (!activeProjectId) {
       await axios.get<ProjectEntity[]>("/project").then((response) => {
-        result = new Project(response.data[0]);
+        setActiveProject(new Project(response.data[0]));
         localStorage.setItem("active_project", response.data[0]._id);
-        setActiveProject(result);
       });
-      return;
+    } else {
+      await axios
+        .get<ProjectEntity>(`/project/${activeProjectId}`)
+        .then((response) => {
+          setActiveProject(new Project(response.data));
+        })
+        .catch((error: Error | AxiosError) => {
+          if (axiosFull.isAxiosError(error) && error.code != "ERR_NETWORK") {
+            localStorage.removeItem("active_project");
+            fetchActiveProject();
+          }
+        });
     }
-
-    await axios
-      .get<ProjectEntity>(`/project/${activeProjectId}`)
-      .then((response) => {
-        setActiveProject(new Project(response.data));
-      });
   }
 
   useEffect(() => {
-    fetchActiveProject();
-  });
-
-  useEffect(() => {
+    setIsFetching(true);
     fetchAllFunctionalities();
-    if (!isUpdated) setIsUpdated(true);
-  }, [isUpdated]);
-
-  function updateHandler() {
-    if (isUpdated) setIsUpdated(false);
-  }
+    fetchActiveProject();
+    setIsFetching(false);
+  }, []);
 
   return (
     <>
@@ -83,7 +77,7 @@ export default function Functionalities() {
         {!isFetching && activeProject && (
           <div className="inline-flex flex-col p-3 bg-red-50 items-start">
             <span className="text-xl font-bold mb-2">Active Project</span>
-            <FunctionalitiesActiveProject data={activeProject!} />
+            <FunctionalitiesActiveProject data={activeProject} />
           </div>
         )}
         <span className="text-4xl mt-5 ml-3">Functionalities</span>
@@ -135,23 +129,24 @@ export default function Functionalities() {
           </p>
         )}
 
-        {!isFetching && (
+        {!isFetching && functionalities.length > 0 && (
           <div className="grid grid-cols-5 auto-rows-fr gap-3 m-3">
-            {isUpdated &&
-              selectedStatus == -1 &&
+            {selectedStatus == -1 &&
               functionalities.map(
                 (functionality) =>
                   functionality.project.id == activeProject?.id && (
                     <Functionality
                       key={functionality.id}
                       data={functionality}
-                      updateState={isUpdated}
-                      updateHandler={updateHandler}
+                      functionalitiesState={[
+                        functionalities,
+                        setFunctionalities,
+                      ]}
                     />
                   )
               )}
-            {isUpdated &&
-              selectedStatus == 0 &&
+            {selectedStatus == 0 &&
+              functionalities.length > 0 &&
               functionalities.map(
                 (functionality) =>
                   functionality.project.id == activeProject?.id &&
@@ -159,13 +154,15 @@ export default function Functionalities() {
                     <Functionality
                       key={functionality.id}
                       data={functionality}
-                      updateState={isUpdated}
-                      updateHandler={updateHandler}
+                      functionalitiesState={[
+                        functionalities,
+                        setFunctionalities,
+                      ]}
                     />
                   )
               )}
-            {isUpdated &&
-              selectedStatus == 1 &&
+            {selectedStatus == 1 &&
+              functionalities.length > 0 &&
               functionalities.map(
                 (functionality) =>
                   functionality.project.id == activeProject?.id &&
@@ -173,13 +170,15 @@ export default function Functionalities() {
                     <Functionality
                       key={functionality.id}
                       data={functionality}
-                      updateState={isUpdated}
-                      updateHandler={updateHandler}
+                      functionalitiesState={[
+                        functionalities,
+                        setFunctionalities,
+                      ]}
                     />
                   )
               )}
-            {isUpdated &&
-              selectedStatus == 2 &&
+            {selectedStatus == 2 &&
+              functionalities.length > 0 &&
               functionalities.map(
                 (functionality) =>
                   functionality.project.id == activeProject?.id &&
@@ -187,8 +186,10 @@ export default function Functionalities() {
                     <Functionality
                       key={functionality.id}
                       data={functionality}
-                      updateState={isUpdated}
-                      updateHandler={updateHandler}
+                      functionalitiesState={[
+                        functionalities,
+                        setFunctionalities,
+                      ]}
                     />
                   )
               )}

@@ -5,6 +5,7 @@ import Edit from "./edit.svg?react";
 import Delete from "./delete.svg?react";
 import Selected from "./selected.svg?react";
 import NotSelected from "./notselected.svg?react";
+import Task from "./task.svg?react";
 
 const defaultClassName =
   "h-5 w-5 rounded-full cursor-pointer shadow-sm hover:shadow";
@@ -65,5 +66,13 @@ export const NotSelectedIcon: React.FunctionComponent<
       {...props}
       className={`${defaultClassName} ${props.className}`}
     />
+  );
+};
+
+export const TaskIcon: React.FunctionComponent<
+  React.SVGProps<SVGSVGElement>
+> = (props) => {
+  return (
+    <Task {...props} className={`${defaultClassName} ${props.className}`} />
   );
 };

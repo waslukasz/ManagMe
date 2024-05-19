@@ -29,12 +29,12 @@ export default function CreateFunctionality() {
     <>
       <div className="flex flex-col">
         <SubNavigation>
-          <SubNavLink to={"/projects"} label="Go to projects" />
-          <SubNavLink to={"/functionalities"} label="Go to functionalities" />
+          <SubNavLink to={"/projects"} label="Projects" />
+          <SubNavLink to={"/functionalities"} label="Functionalities" />
         </SubNavigation>
 
-        <div className="flex justify-center mt-7 font-sans">
-          <form className="inline-flex flex-col gap-1">
+        <div className="flex justify-center font-sans">
+          <form className="inline-flex bg-gray-100 p-7 rounded-b flex-col gap-1">
             <label className="font-bold">Functionality name</label>
             <input
               value={form.name}

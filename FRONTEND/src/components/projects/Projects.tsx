@@ -71,7 +71,7 @@ export default function Projects() {
             Loading content...
           </p>
         )}
-        {!isFetching && (
+        {!isFetching && activeProject.id && (
           <div className="grid grid-cols-1 content-stretch gap-3 m-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
             {projects.map((project) => (
               <Project

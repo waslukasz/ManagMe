@@ -28,7 +28,7 @@ export default function ProjectsCreate() {
     <>
       <div className="flex flex-col">
         <SubNavigation>
-          <SubNavLink to={"/projects"} label="Go back to all projects" />
+          <SubNavLink to={"/projects"} label="Projects" />
         </SubNavigation>
 
         <div className="flex justify-center font-sans">

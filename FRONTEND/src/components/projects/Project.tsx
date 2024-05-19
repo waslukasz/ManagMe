@@ -95,7 +95,7 @@ export default function Project({
           {!isEditing && (
             <>
               {(project.id == activeProject.id && (
-                <SelectedIcon className="fill-yellow-500 mr-auto float-start shadow-none drop-shadow-none hover:shadow-none hover:drop-shadow-none rounded-none" />
+                <SelectedIcon className="fill-yellow-500 mr-auto float-start shadow-none drop-shadow-none hover:shadow-none hover:drop-shadow-none rounded-none pointer-events-none" />
               )) || (
                 <NotSelectedIcon
                   onClick={handleSelect}
@@ -156,7 +156,7 @@ export default function Project({
           {/* 
             Used fields:
 
-            id <- from task
+            id <- from project
 
             name
             description
