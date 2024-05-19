@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Task,
+  Task as TaskType,
   TaskDtoProceed,
   TaskDtoUpdate,
   TaskEntity,
@@ -18,14 +18,14 @@ import { format as formatDate, isValid as isDateValid } from "date-fns";
 import { Status } from "../../types/UtilTypes";
 import { User, UserEntity } from "../../types/UserTypes";
 
-export default function TasksKanbanItem({
+export default function Task({
   data,
   tasksState,
 }: {
-  data: Task;
-  tasksState: [Task[], React.Dispatch<React.SetStateAction<Task[]>>];
+  data: TaskType;
+  tasksState: [TaskType[], React.Dispatch<React.SetStateAction<TaskType[]>>];
 }) {
-  const [task, setTask] = useState<Task>(data);
+  const [task, setTask] = useState<TaskType>(data);
   const [tasks, setTasks] = tasksState;
   const [users, setUsers] = useState<User[]>({} as User[]);
 
@@ -53,7 +53,10 @@ export default function TasksKanbanItem({
     }
 
     axios.patch<TaskEntity>(`/task/${task.id}`, formUpdate).then((response) => {
-      const result: Task = { ...new Task(response.data), ...formUpdate };
+      const result: TaskType = {
+        ...new TaskType(response.data),
+        ...formUpdate,
+      };
       setTask(result);
       setIsEditing(false);
     });
@@ -73,7 +76,7 @@ export default function TasksKanbanItem({
       axios
         .patch<TaskEntity>(`/task/${task.id}`, formProceed)
         .then((response) => {
-          const result = new Task(response.data);
+          const result = new TaskType(response.data);
           setTask(result);
           setTasks((prev) => prev.map((t) => (t.id == result.id ? result : t)));
           setFormUpdate(new TaskDtoUpdate(result));
@@ -90,7 +93,7 @@ export default function TasksKanbanItem({
       axios
         .patch<TaskEntity>(`/task/${task.id}`, formProceed)
         .then((response) => {
-          const result = new Task(response.data);
+          const result = new TaskType(response.data);
           setTask(result);
           setTasks((prev) => prev.map((t) => (t.id == result.id ? result : t)));
           setFormUpdate(new TaskDtoUpdate(result));
@@ -368,8 +371,8 @@ export default function TasksKanbanItem({
                     Submit to mark current task as finished.
                   </span>
                   <div className="flex items-center text-xs italic">
-                    If you don't want to proceed, please click{" "}
-                    <BackIcon className="h-3.5 fill-red-600 pointer-events-none" />
+                    If you don't want to proceed, please click
+                    <BackIcon className="h-3.5 ml-1 fill-red-600 pointer-events-none" />
                     .
                   </div>
                 </>

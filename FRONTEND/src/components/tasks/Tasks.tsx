@@ -43,7 +43,9 @@ export default function Tasks() {
           />
         </SubNavigation>
 
-        <span className="text-4xl mt-5 ml-3">Tasks</span>
+        <span className="text-4xl mt-5 ml-3">
+          {(tasks.length > 0 && <>Tasks</>) || <>No tasks to display.</>}
+        </span>
         {isFetching && (
           <p className="text-center text-2xl tracking-wider">
             Loading content...

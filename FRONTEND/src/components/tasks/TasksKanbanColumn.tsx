@@ -1,5 +1,5 @@
 import { Task as TaskType } from "../../types/TaskTypes";
-import TasksKanbanItem from "./TasksKanbanItem";
+import Task from "./Task";
 
 export default function TasksKanbanColumn({
   data,
@@ -18,11 +18,7 @@ export default function TasksKanbanColumn({
         </div>
         <div className="flex flex-col gap-3">
           {data.map((task) => (
-            <TasksKanbanItem
-              key={task.id}
-              data={task}
-              tasksState={tasksState}
-            />
+            <Task key={task.id} data={task} tasksState={tasksState} />
           ))}
         </div>
       </div>
