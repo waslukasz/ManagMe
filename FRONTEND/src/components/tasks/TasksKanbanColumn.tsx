@@ -3,11 +3,11 @@ import TasksKanbanItem from "./TasksKanbanItem";
 
 export default function TasksKanbanColumn({
   data,
-  taskState,
+  tasksState,
   title,
 }: {
   data: TaskType[];
-  taskState: [TaskType[], React.Dispatch<React.SetStateAction<TaskType[]>>];
+  tasksState: [TaskType[], React.Dispatch<React.SetStateAction<TaskType[]>>];
   title: string;
 }) {
   return (
@@ -18,7 +18,11 @@ export default function TasksKanbanColumn({
         </div>
         <div className="flex flex-col gap-3">
           {data.map((task) => (
-            <TasksKanbanItem key={task.id} data={task} taskState={taskState} />
+            <TasksKanbanItem
+              key={task.id}
+              data={task}
+              tasksState={tasksState}
+            />
           ))}
         </div>
       </div>

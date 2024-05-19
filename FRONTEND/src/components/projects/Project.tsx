@@ -1,50 +1,44 @@
 import { useState } from "react";
-import AcceptIcon from "../../assets/accept.svg";
-import EditIcon from "../../assets/edit.svg";
-import DeleteIcon from "../../assets/delete.svg";
-import BackIcon from "../../assets/back.svg";
-import SelectedIcon from "../../assets/selected.svg";
-import NotSelectedIcon from "../../assets/notselected.svg";
 import axios from "../../api/axios";
-import { ProjectDto, Project as ProjectType } from "../../types/ProjectTypes";
+import {
+  ProjectDto,
+  ProjectEntity,
+  Project as ProjectType,
+} from "../../types/ProjectTypes";
+
+import {
+  AcceptIcon,
+  BackIcon,
+  DeleteIcon,
+  EditIcon,
+  NotSelectedIcon,
+  SelectedIcon,
+} from "../../assets";
 
 export default function Project({
   data,
-  updateState,
-  updateHandler,
+  projectsState,
+  activeProjectState,
 }: {
   data: ProjectType;
-  updateState: any;
-  updateHandler: any;
+  projectsState: [
+    ProjectType[],
+    React.Dispatch<React.SetStateAction<ProjectType[]>>
+  ];
+  activeProjectState: [
+    ProjectType,
+    React.Dispatch<React.SetStateAction<ProjectType>>
+  ];
 }) {
   const [project, setProject] = useState<ProjectType>(data);
-  const [form, setForm] = useState<ProjectDto>(new ProjectDto(project));
+  const [projects, setProjects] = projectsState;
+  const [activeProject, setActiveProject] = activeProjectState;
 
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [isActive, setIsActive] = useState<boolean>(
-    localStorage.getItem("active_project") == project.id
+  const [formUpdate, setFormUpdate] = useState<ProjectDto>(
+    new ProjectDto(project)
   );
 
-  const editStyle = {
-    filter:
-      "invert(32%) sepia(72%) saturate(552%) hue-rotate(150deg) brightness(95%) contrast(85%)",
-  };
-  const deleteStyle = {
-    filter:
-      "invert(24%) sepia(30%) saturate(5752%) hue-rotate(346deg) brightness(94%) contrast(84%)",
-  };
-  const acceptStyle = {
-    filter:
-      "invert(33%) sepia(79%) saturate(618%) hue-rotate(78deg) brightness(105%) contrast(87%)",
-  };
-  const backStyle = {
-    filter:
-      "invert(32%) sepia(72%) saturate(552%) hue-rotate(150deg) brightness(95%) contrast(85%)",
-  };
-  const selectedStyle = {
-    filter:
-      "invert(79%) sepia(34%) saturate(1323%) hue-rotate(329deg) brightness(104%) contrast(97%)",
-  };
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   async function handleUpdate() {
     if (!isEditing) {
@@ -52,145 +46,162 @@ export default function Project({
       return;
     }
 
-    if (!form.name) return;
+    if (!formUpdate.name) return;
 
-    if (form.name == project.name && form.description == form.description) {
+    if (
+      formUpdate.name == project.name &&
+      formUpdate.description == formUpdate.description
+    ) {
       setIsEditing(false);
       return;
     }
 
     axios
-      .patch<ProjectType>(`/project/${project.id}`, form)
-      .then(() => {
-        setProject({ ...project, ...form });
+      .patch<ProjectEntity>(`/project/${project.id}`, formUpdate)
+      .then((response) => {
+        const result = { ...new ProjectType(response.data), ...formUpdate };
+        setProject(result);
         setIsEditing(false);
-      })
-      .catch(() => {});
+      });
   }
 
   async function handleCancel() {
-    setForm({
-      name: project.name,
-      description: project.description,
-    });
+    setFormUpdate(new ProjectDto(project));
     setIsEditing(false);
   }
 
   async function handleDelete() {
     axios.delete(`/project/${project.id}`).then(() => {
-      if (isActive) localStorage.removeItem("active_project");
-      updateHandler();
+      setProjects((prev) => prev.filter((p) => p.id != project.id));
     });
   }
 
   async function handleSelect() {
     localStorage.setItem("active_project", project.id);
-    updateHandler();
+    setActiveProject(project);
   }
 
   return (
     <>
       <div
-        className={`inline-flex flex-col min-w-32 p-3 rounded-md font-sans shadow-md border border-solid ${
-          (!isActive && "border-gray-100") || "border-yellow-500"
+        className={`flex flex-col p-2 rounded bg-white shadow-sm font-sans drop-shadow box-border border border-solid ${
+          (project.id == activeProject.id && "border-yellow-500") ||
+          "border-gray-100"
         }`}
       >
-        <div className="flex items-baseline gap-0.5 rounded-full justify-end mb-2 select-none">
-          {isActive && (
-            <img
-              className="h-4 mr-auto self-start"
-              style={selectedStyle}
-              src={SelectedIcon}
-              alt="Selected"
-            />
-          )}
-
-          {!isActive && (
-            <img
-              className="h-4 cursor-pointer mr-auto self-start select-none"
-              onClick={handleSelect}
-              style={selectedStyle}
-              src={NotSelectedIcon}
-              alt="Selected"
-            />
-          )}
-
+        {/* Menu */}
+        <div className="flex gap-0.5 p-2 rounded justify-end">
+          {/* Menu -> Default */}
           {!isEditing && (
             <>
-              <img
-                className="h-5 cursor-pointer"
-                style={editStyle}
-                src={EditIcon}
-                alt="Edit"
-                onClick={handleUpdate}
-              />
-              <img
-                className="h-5 cursor-pointer"
-                style={deleteStyle}
-                src={DeleteIcon}
-                alt="Delete"
-                onClick={handleDelete}
-              />
+              {(project.id == activeProject.id && (
+                <SelectedIcon className="fill-yellow-500 mr-auto float-start shadow-none drop-shadow-none hover:shadow-none hover:drop-shadow-none rounded-none" />
+              )) || (
+                <NotSelectedIcon
+                  onClick={handleSelect}
+                  className="fill-yellow-500 mr-auto hover:shadow-none hover:drop-shadow-none shadow-none drop-shadow-none rounded-none"
+                />
+              )}
+
+              <div className="flex">
+                <EditIcon
+                  className="fill-cyan-600 hover:fill-cyan-700"
+                  onClick={handleUpdate}
+                />
+
+                <DeleteIcon
+                  className="fill-red-600 hover:fill-red-700"
+                  onClick={handleDelete}
+                />
+              </div>
             </>
           )}
 
+          {/* Menu -> Edit mode */}
           {isEditing && (
             <>
-              <img
-                className="h-5 cursor-pointer"
-                style={acceptStyle}
-                src={AcceptIcon}
-                alt="Accept"
+              <AcceptIcon
+                className="fill-cyan-600 hover:fill-cyan-700"
                 onClick={handleUpdate}
               />
-              <img
-                className="h-5 cursor-pointer"
-                style={backStyle}
-                src={BackIcon}
-                alt="Cancel"
+              <BackIcon
+                className="fill-red-600 hover:fill-red-700"
                 onClick={handleCancel}
               />
             </>
           )}
         </div>
-        <hr />
-        {!isEditing && (
-          <div className="flex flex-col pt-1">
-            <span className="text-xl font-bold">{project.name}</span>
-            <span className="text-xs mt-1">{project.description}</span>
-          </div>
-        )}
 
-        {isEditing && (
-          <div className="flex flex-col gap-0.5 mt-2">
-            <label className="select-none text-sm font-bold">
-              Project name
-            </label>
-            <input
-              value={form.name}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  name: event.target.value,
-                })
-              }
-              className="border border-solid focus:outline-none p-1 rounded"
-              type="text"
-            />
-            <br />
-            <label className="select-none text-sm font-bold">Description</label>
-            <textarea
-              value={form.description ?? ""}
-              onChange={(event) =>
-                setForm({
-                  ...form,
-                  description: event.target.value,
-                })
-              }
-              className="border border-solid focus:outline-none p-1 rounded"
-            />
-          </div>
-        )}
+        <hr className="mb-2" />
+
+        {/* Project details */}
+        <div className="flex flex-col flex-shrink px-1">
+          {/* Project details -> Default */}
+          {/* 
+            Project fields to display:
+
+            name
+            description
+          */}
+          {!isEditing && (
+            <>
+              <div className="text-lg leading-6 font-semibold">
+                {project.name}
+              </div>
+              <div className="text-sm">{project.description}</div>
+            </>
+          )}
+
+          {/* Project details -> Edit mode */}
+          {/* 
+            Used fields:
+
+            id <- from task
+
+            name
+            description
+          */}
+
+          {isEditing && (
+            <>
+              <form className="flex flex-col gap-2">
+                {/* Edit -> Name */}
+                <label className="flex flex-col">
+                  <span className="text-sm ml-0.5">Name</span>
+                  <input
+                    value={formUpdate.name}
+                    onChange={(event) =>
+                      setFormUpdate((prev) => ({
+                        ...prev,
+                        name: event.target.value,
+                      }))
+                    }
+                    className="border p-1 rounded outline-none focus:border-gray-600"
+                    type="text"
+                  />
+                </label>
+
+                {/* Edit -> Description */}
+                <label className="flex flex-col">
+                  <span className="text-sm ml-0.5">Description</span>
+                  <textarea
+                    value={formUpdate.description ?? ""}
+                    onChange={(event) => {
+                      event.target.style.height = `0px`;
+                      event.target.style.height = `${event.target.scrollHeight}px`;
+                      setFormUpdate((prev) => ({
+                        ...prev,
+                        description: event.target.value,
+                      }));
+                    }}
+                    className="border p-1 rounded outline-none resize-none overflow-hidden focus:border-gray-600"
+                    rows={3}
+                  />
+                </label>
+              </form>
+            </>
+          )}
+        </div>
       </div>
     </>
   );

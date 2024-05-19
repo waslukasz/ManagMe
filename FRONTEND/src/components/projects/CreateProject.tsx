@@ -31,8 +31,8 @@ export default function ProjectsCreate() {
           <SubNavLink to={"/projects"} label="Go back to all projects" />
         </SubNavigation>
 
-        <div className="flex justify-center mt-7 font-sans">
-          <form className="inline-flex flex-col gap-1">
+        <div className="flex justify-center font-sans">
+          <form className="inline-flex bg-gray-100 p-7 rounded-b flex-col gap-1">
             <label className="font-bold">Project name</label>
             <input
               value={form.name}

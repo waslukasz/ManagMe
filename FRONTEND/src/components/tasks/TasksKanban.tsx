@@ -29,17 +29,17 @@ export default function TasksKanban({ data }: { data: Task[] }) {
       <TasksKanbanColumn
         data={kanban?.todo}
         title="Todos"
-        taskState={[tasks, setTasks]}
+        tasksState={[tasks, setTasks]}
       />
       <TasksKanbanColumn
         data={kanban?.doing}
         title="Doing"
-        taskState={[tasks, setTasks]}
+        tasksState={[tasks, setTasks]}
       />
       <TasksKanbanColumn
         data={kanban?.done}
         title="Done"
-        taskState={[tasks, setTasks]}
+        tasksState={[tasks, setTasks]}
       />
     </div>
   );

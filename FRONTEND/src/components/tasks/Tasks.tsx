@@ -10,7 +10,6 @@ export default function Tasks() {
   const { functionalityId } = useParams();
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [isUpdated, setIsUpdated] = useState<boolean>(true);
 
   async function fetchAllTasks() {
     setIsFetching(true);
@@ -27,15 +26,6 @@ export default function Tasks() {
   useEffect(() => {
     fetchAllTasks();
   }, []);
-
-  useEffect(() => {
-    fetchAllTasks();
-    if (!isUpdated) setIsUpdated(true);
-  }, [isUpdated]);
-
-  function updateHandler() {
-    if (isUpdated) setIsUpdated(false);
-  }
 
   return (
     <>

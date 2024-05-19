@@ -20,13 +20,13 @@ import { User, UserEntity } from "../../types/UserTypes";
 
 export default function TasksKanbanItem({
   data,
-  taskState,
+  tasksState,
 }: {
   data: Task;
-  taskState: [Task[], React.Dispatch<React.SetStateAction<Task[]>>];
+  tasksState: [Task[], React.Dispatch<React.SetStateAction<Task[]>>];
 }) {
   const [task, setTask] = useState<Task>(data);
-  const [tasks, setTasks] = taskState;
+  const [tasks, setTasks] = tasksState;
   const [users, setUsers] = useState<User[]>({} as User[]);
 
   const [formUpdate, setFormUpdate] = useState<TaskDtoUpdate>(
@@ -180,7 +180,6 @@ export default function TasksKanbanItem({
           {/* 
             Task fields to display:
 
-            id
             name
             description
             created
