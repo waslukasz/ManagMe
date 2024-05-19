@@ -83,7 +83,7 @@ export const updateFunctionality = async (
       description,
       priority,
       status,
-    });
+    }).populate("owner project");
 
     return res.status(200).json(functionality).end();
   } catch (error) {

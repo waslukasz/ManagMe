@@ -1,11 +1,12 @@
 import { useState } from "react";
 import {
   FunctionalityDtoUpdate,
+  FunctionalityEntity,
   Functionality as FunctionalityType,
 } from "../../types/FunctionalityTypes";
 import { format as formatDate } from "date-fns";
 import axios from "../../api/axios";
-import { Status } from "../../types/UtilTypes";
+import { Priority, Status } from "../../types/UtilTypes";
 import {
   AcceptIcon,
   BackIcon,
@@ -39,9 +40,25 @@ export default function Functionality({
     if (!isEditing) {
       setIsEditing(true);
       return;
-
-      setIsEditing(false);
     }
+
+    axios
+      .patch<FunctionalityEntity>(
+        `/functionality/${functionality.id}`,
+        formUpdate
+      )
+      .then((response) => {
+        console.log(response.data);
+        const result: FunctionalityType = {
+          ...new FunctionalityType(response.data),
+          ...formUpdate,
+        };
+        setFunctionality(result);
+        setFunctionalities((prev) =>
+          prev.map((t) => (t.id == result.id ? result : t))
+        );
+        setIsEditing(false);
+      });
   }
 
   async function handleCancel() {
@@ -50,8 +67,11 @@ export default function Functionality({
   }
 
   async function handleDelete() {
-    // axios.delete(`/functionality/${functionality.id}`).then(() => {
-    // });
+    axios.delete(`/functionality/${functionality.id}`).then(() => {
+      setFunctionalities((prev) =>
+        prev.filter((t) => t.id != functionality.id)
+      );
+    });
   }
 
   async function handleNavigate() {
@@ -101,7 +121,7 @@ export default function Functionality({
         <hr className="mb-2" />
 
         {/* Functionality details */}
-        <div className="flex flex-col flex-shrink px-1">
+        <div className="flex flex-col flex-shrink px-1 h-full">
           {/* Functionality details -> Default */}
           {/* 
           Functionality fields to display:
@@ -135,7 +155,7 @@ export default function Functionality({
                 )}
               </div>
 
-              <div className="text-xs mt-1 text-right text-gray-500 tracking-wide italic">
+              <div className="text-xs mt-auto text-right text-gray-500 tracking-wide italic">
                 {formatDate(functionality.created, "kk:mm:ss dd MMMM yyyy")}
               </div>
             </>
@@ -187,6 +207,50 @@ export default function Functionality({
                     className="border p-1 rounded outline-none resize-none overflow-hidden focus:border-gray-600"
                     rows={3}
                   />
+                </label>
+
+                {/* Edit -> Status */}
+                <label className="flex flex-col">
+                  <span className="text-sm ml-0.5">Status</span>
+                  <select
+                    value={formUpdate.status}
+                    onChange={(event) =>
+                      setFormUpdate((prev) => ({
+                        ...prev,
+                        status: parseInt(event.target.value),
+                      }))
+                    }
+                    className="border p-1 rounded outline-none w-full resize-none overflow-hidden focus:border-gray-600"
+                  >
+                    <option value={Status.Todo}>{Status[Status.Todo]}</option>
+                    <option value={Status.Doing}>{Status[Status.Doing]}</option>
+                    <option value={Status.Done}>{Status[Status.Done]}</option>
+                  </select>
+                </label>
+
+                {/* Edit -> Priority */}
+                <label className="flex flex-col">
+                  <span className="text-sm ml-0.5">Priority</span>
+                  <select
+                    value={formUpdate.priority}
+                    onChange={(event) =>
+                      setFormUpdate((prev) => ({
+                        ...prev,
+                        priority: parseInt(event.target.value),
+                      }))
+                    }
+                    className="border p-1 rounded outline-none w-full resize-none overflow-hidden focus:border-gray-600"
+                  >
+                    <option value={Priority.Low}>
+                      {Priority[Priority.Low]}
+                    </option>
+                    <option value={Priority.Medium}>
+                      {Priority[Priority.Medium]}
+                    </option>
+                    <option value={Priority.High}>
+                      {Priority[Priority.High]}
+                    </option>
+                  </select>
                 </label>
               </form>
             </>
