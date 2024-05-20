@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { UserDtoLogin } from "../../types/UserTypes";
+import { User, UserDtoLogin } from "../../types/UserTypes";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import axios from "../../api/axios";
 
 export default function NavAuth() {
   const auth = useAuth();
@@ -17,6 +19,12 @@ export default function NavAuth() {
     await auth.signIn(form.username, form.password);
     setLoginFailed(!auth.isLoggedIn);
     if (from != "/") navigate(from, { replace: true });
+  }
+
+  async function handleOauth(credResponse: CredentialResponse) {
+    await axios
+      .post<User>("/oauth", credResponse)
+      .then((response) => auth.oauth(response.data));
   }
 
   async function handleLogout() {
@@ -78,13 +86,19 @@ export default function NavAuth() {
                   Invalid username or password.
                 </span>
               )}
-              <div className="flex justify-between items-center mt-3">
+              <div className="flex justify-between flex-col items-center mt-3">
                 <button
                   onClick={handleLogin}
-                  className="shadow px-4 py-2.5 rounded bg-blue-400 font-bold text-white hover:bg-blue-500"
+                  className="shadow px-4 py-2.5 mb-3 rounded bg-blue-400 font-bold text-white hover:bg-blue-500"
                 >
                   Sign in
                 </button>
+                <GoogleLogin
+                  onSuccess={(credentialResponse) =>
+                    handleOauth(credentialResponse)
+                  }
+                  onError={() => console.log("login failed")}
+                />
               </div>
             </div>
           )}

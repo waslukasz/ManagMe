@@ -9,6 +9,7 @@ type AuthContextType = {
   isLoggedIn: boolean;
   signIn: (username: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
+  oauth: (user: User) => Promise<void>;
   updateToken: (token: string) => Promise<void>;
 };
 
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
   signIn: async (username: string, password: string) => false,
   signOut: async () => {},
+  oauth: async (user: User) => {},
   updateToken: async (token: string) => {},
 });
 
@@ -51,6 +53,14 @@ export const AuthProvider = ({ children }: Props) => {
     // TODO
   };
 
+  const oauthSignIn = async (user: User) => {
+    setData((prevState) => ({
+      ...prevState,
+      user: user,
+      isLoggedIn: true,
+    }));
+  };
+
   useEffect(() => {
     if (!document.cookie.includes("_auth")) return;
 
@@ -68,6 +78,7 @@ export const AuthProvider = ({ children }: Props) => {
     isLoggedIn: false,
     signIn: signIn,
     signOut: signOut,
+    oauth: oauthSignIn,
     updateToken: updateToken,
   });
 

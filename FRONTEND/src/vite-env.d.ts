@@ -1,3 +1,5 @@
+import "vite/client";
+
 declare module "*.svg?react" {
   import * as React from "react";
 

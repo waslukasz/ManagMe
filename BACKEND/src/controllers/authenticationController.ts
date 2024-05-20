@@ -1,4 +1,5 @@
 import {
+  UserModel,
   createUser,
   getUserBySessionToken,
   getUserByUsername,
@@ -6,6 +7,24 @@ import {
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { jwtDecode } from "jwt-decode";
+
+interface OathUser {
+  aud: string;
+  azp: string;
+  email: string;
+  email_verified: boolean;
+  exp: number;
+  family_name: string;
+  given_name: string;
+  iat: number;
+  iss: string;
+  jti: string;
+  name: string;
+  nbf: number;
+  picture: string;
+  sub: string;
+}
 
 export const auth = async (req: express.Request, res: express.Response) => {
   const { _auth } = req.cookies;
@@ -14,6 +33,26 @@ export const auth = async (req: express.Request, res: express.Response) => {
   if (!user) return res.clearCookie("_auth").sendStatus(400);
 
   return res.status(200).json(user).end();
+};
+
+export const oauth = async (req: express.Request, res: express.Response) => {
+  const { clientId, credential } = req.body;
+
+  const data: OathUser = jwtDecode(credential);
+
+  let user = await UserModel.findOne({ username: data.email });
+  user = await new UserModel({
+    name: data.given_name,
+    surname: data.family_name,
+    username: data.email,
+    authentication: {
+      sessionToken: credential,
+      password: "",
+    },
+  });
+
+  await user.save();
+  res.cookie("_auth", credential).status(200).json(user).end();
 };
 
 export const login = async (req: express.Request, res: express.Response) => {

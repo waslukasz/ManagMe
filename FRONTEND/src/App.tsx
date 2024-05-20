@@ -11,10 +11,11 @@ import CreateTask from "./components/tasks/CreateTask";
 import RequireAuth from "./components/auth/RequireAuth";
 import Unauthorized from "./components/auth/Unauthorized";
 import Home from "./components/Home";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
   return (
-    <>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <Navigation />
         <Routes>
@@ -36,7 +37,7 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
         </Routes>
       </BrowserRouter>
-    </>
+    </GoogleOAuthProvider>
   );
 }
 

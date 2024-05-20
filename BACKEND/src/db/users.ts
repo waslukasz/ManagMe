@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true },
   authentication: {
-    password: { type: String, required: true, select: false },
+    password: { type: String, select: false },
     sessionToken: { type: String, select: false },
     roles: [{ type: String }],
   },
