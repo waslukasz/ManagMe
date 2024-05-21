@@ -3,6 +3,7 @@ import {
   createUser,
   getUserBySessionToken,
   getUserByUsername,
+  getUsers,
 } from "../db/users";
 import express from "express";
 import bcrypt from "bcrypt";
@@ -31,7 +32,6 @@ export const auth = async (req: express.Request, res: express.Response) => {
   if (!_auth) return res.sendStatus(400);
   const user = await getUserBySessionToken(_auth);
   if (!user) return res.clearCookie("_auth").sendStatus(400);
-
   return res.status(200).json(user).end();
 };
 
@@ -41,18 +41,32 @@ export const oauth = async (req: express.Request, res: express.Response) => {
   const data: OathUser = jwtDecode(credential);
 
   let user = await UserModel.findOne({ username: data.email });
-  user = await new UserModel({
-    name: data.given_name,
-    surname: data.family_name,
-    username: data.email,
-    authentication: {
-      sessionToken: credential,
-      password: "",
-    },
-  });
 
+  if (!user) {
+    user = await new UserModel({
+      name: data.given_name,
+      surname: data.family_name,
+      username: data.email,
+      authentication: {
+        password: "",
+        roles: [],
+      },
+    });
+  }
+
+  const token = jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+      roles: user.authentication.roles,
+    },
+    process.env.JWT_SECRET
+  );
+
+  user.authentication.sessionToken = token;
   await user.save();
-  res.cookie("_auth", credential).status(200).json(user).end();
+
+  return res.cookie("_auth", token).status(200).json(user).end();
 };
 
 export const login = async (req: express.Request, res: express.Response) => {
@@ -87,7 +101,6 @@ export const login = async (req: express.Request, res: express.Response) => {
     const result = await getUserByUsername(username);
     return res.cookie("_auth", token).json(result).status(200).end();
   } catch (error) {
-    console.log(error);
     return res.sendStatus(400);
   }
 };

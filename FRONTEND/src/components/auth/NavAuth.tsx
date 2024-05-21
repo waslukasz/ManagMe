@@ -97,7 +97,6 @@ export default function NavAuth() {
                   onSuccess={(credentialResponse) =>
                     handleOauth(credentialResponse)
                   }
-                  onError={() => console.log("login failed")}
                 />
               </div>
             </div>

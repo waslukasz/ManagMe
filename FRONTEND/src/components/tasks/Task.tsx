@@ -131,7 +131,7 @@ export default function Task({
             <>
               {!task.end && (
                 <>
-                  {((auth.user?.roles.some(
+                  {((auth.user?.roles?.some(
                     (role) =>
                       role == UserRole[UserRole.Admin] ||
                       role == UserRole[UserRole.Devops]
