@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import axios from "../api/axios";
 import { User, UserEntity } from "../types/UserTypes";
+import { CredentialResponse } from "@react-oauth/google";
 
 type Props = { children: React.ReactNode };
 
@@ -9,7 +10,7 @@ type AuthContextType = {
   isLoggedIn: boolean;
   signIn: (username: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
-  oauth: (user: User) => Promise<void>;
+  oauth: (credResponse: CredentialResponse) => Promise<void>;
   updateToken: (token: string) => Promise<void>;
 };
 
@@ -18,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
   signIn: async (username: string, password: string) => false,
   signOut: async () => {},
-  oauth: async (user: User) => {},
+  oauth: async (credResponse: CredentialResponse) => {},
   updateToken: async (token: string) => {},
 });
 
@@ -53,12 +54,15 @@ export const AuthProvider = ({ children }: Props) => {
     // TODO
   };
 
-  const oauthSignIn = async (user: User) => {
-    setData((prevState) => ({
-      ...prevState,
-      user: user,
-      isLoggedIn: true,
-    }));
+  const oauthSignIn = async (credResponse: CredentialResponse) => {
+    await axios.post<User>("/oauth", credResponse).then((response) => {
+      setData((prevState) => ({
+        ...prevState,
+        user: response.data,
+        isLoggedIn: true,
+      }));
+      return true;
+    });
   };
 
   useEffect(() => {

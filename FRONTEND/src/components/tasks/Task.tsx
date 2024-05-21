@@ -131,13 +131,13 @@ export default function Task({
             <>
               {!task.end && (
                 <>
-                  {((auth.user?.roles?.some(
-                    (role) =>
-                      role == UserRole[UserRole.Admin] ||
-                      role == UserRole[UserRole.Devops]
-                  ) &&
-                    !task.assignedUser?.id) ||
-                    auth.user?.id == task.assignedUser?.id) && (
+                  {(auth.user?.id == task.assignedUser?.id ||
+                    (auth.user?.roles?.some(
+                      (role) =>
+                        role == UserRole[UserRole.Admin] ||
+                        role == UserRole[UserRole.Devops]
+                    ) &&
+                      !task.assignedUser?.id)) && (
                     <ContinueIcon
                       className="fill-cyan-600 hover:fill-cyan-700"
                       onClick={handleProceed}

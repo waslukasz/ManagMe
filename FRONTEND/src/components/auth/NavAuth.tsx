@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-import { User, UserDtoLogin } from "../../types/UserTypes";
+import { UserDtoLogin } from "../../types/UserTypes";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import axios from "../../api/axios";
 
 export default function NavAuth() {
   const auth = useAuth();
@@ -22,9 +21,8 @@ export default function NavAuth() {
   }
 
   async function handleOauth(credResponse: CredentialResponse) {
-    await axios
-      .post<User>("/oauth", credResponse)
-      .then((response) => auth.oauth(response.data));
+    auth.oauth(credResponse);
+    if (from != "/") navigate(from, { replace: true });
   }
 
   async function handleLogout() {
