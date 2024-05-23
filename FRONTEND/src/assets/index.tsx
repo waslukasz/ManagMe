@@ -6,6 +6,7 @@ import Delete from "./delete.svg?react";
 import Selected from "./selected.svg?react";
 import NotSelected from "./notselected.svg?react";
 import Task from "./task.svg?react";
+import Notification from "./notification.svg?react";
 
 const defaultClassName =
   "h-5 w-5 rounded-full cursor-pointer shadow-sm hover:shadow";
@@ -81,6 +82,9 @@ export const NotificationIcon: React.FunctionComponent<
   React.SVGProps<SVGSVGElement>
 > = (props) => {
   return (
-    <Task {...props} className={`${defaultClassName} ${props.className}`} />
+    <Notification
+      {...props}
+      className={`${defaultClassName} ${props.className}`}
+    />
   );
 };

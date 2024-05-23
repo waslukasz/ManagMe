@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { UserDtoLogin } from "../../types/UserTypes";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import NavNotifications from "../notifications/NavNotifications";
 
 export default function NavAuth() {
   const auth = useAuth();
@@ -35,7 +36,8 @@ export default function NavAuth() {
   return (
     <>
       {auth.isLoggedIn && (
-        <div>
+        <div className="flex items-center gap-5">
+          <NavNotifications />
           <button
             className="select-none text-red-500 hover:text-white hover:bg-red-500 border-red-500 font-mono rounded-md border-solid border p-2  cursor-pointer transition-colors duration-100"
             onClick={handleLogout}

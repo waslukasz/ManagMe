@@ -18,6 +18,7 @@ import { format as formatDate, isValid as isDateValid } from "date-fns";
 import { Status } from "../../types/UtilTypes";
 import { User, UserEntity, UserRole } from "../../types/UserTypes";
 import useAuth from "../../hooks/useAuth";
+import { NotificationService } from "../../services/NotificationsService";
 
 export default function Task({
   data,
@@ -102,6 +103,12 @@ export default function Task({
           setFormUpdate(new TaskDtoUpdate(result));
           setFormProceed(new TaskDtoProceed(result));
           setIsProceeding(false);
+          NotificationService.send({
+            title: "Work well done.",
+            message: `${auth.user?.fullname} finished project ${task.name}.`,
+            priority: 0,
+            recipient: auth.user?.id!,
+          });
         });
       return;
     }
