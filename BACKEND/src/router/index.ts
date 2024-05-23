@@ -6,6 +6,7 @@ import projects from "./projects";
 import functionalities from "./functionalities";
 import tasks from "./tasks";
 import dotenv from "dotenv";
+import notifications from "./notifications";
 
 const router = express.Router();
 dotenv.config();
@@ -16,6 +17,7 @@ export default (): express.Router => {
   projects(router);
   functionalities(router);
   tasks(router);
+  notifications(router);
 
   return router;
 };

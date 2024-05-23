@@ -76,3 +76,11 @@ export const TaskIcon: React.FunctionComponent<
     <Task {...props} className={`${defaultClassName} ${props.className}`} />
   );
 };
+
+export const NotificationIcon: React.FunctionComponent<
+  React.SVGProps<SVGSVGElement>
+> = (props) => {
+  return (
+    <Task {...props} className={`${defaultClassName} ${props.className}`} />
+  );
+};
