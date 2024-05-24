@@ -93,11 +93,13 @@ export default function NavAuth() {
                 >
                   Sign in
                 </button>
-                <GoogleLogin
-                  onSuccess={(credentialResponse) =>
-                    handleOauth(credentialResponse)
-                  }
-                />
+                {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+                  <GoogleLogin
+                    onSuccess={(credentialResponse) =>
+                      handleOauth(credentialResponse)
+                    }
+                  />
+                )}
               </div>
             </div>
           )}
