@@ -14,7 +14,7 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: process.env.FRONT_URL,
+    origin: process.env.FRONTEND_URL,
   })
 );
 
@@ -33,6 +33,6 @@ server.listen(process.env.PORT, () => {
 
 mongoose.Promise = Promise;
 mongoose
-  .connect(process.env.MONGO_URL)
+  .connect(process.env.MONGO_DB_CONNECTION_STRING)
   .then(() => console.log("Database connected."))
   .catch((error) => console.log("Database not connected.", error));

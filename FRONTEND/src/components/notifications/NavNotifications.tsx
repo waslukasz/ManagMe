@@ -3,15 +3,24 @@ import { NotificationIcon } from "../../assets";
 import Notification from "./Notification.tsx";
 import { NotificationService } from "../../services/NotificationsService.ts";
 import { Notification as NotificationType } from "../../types/NotificationTypes.ts";
+import useAuth from "../../hooks/useAuth.tsx";
 
 export default function NavNotifications() {
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [count, setCount] = useState<number>(-1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const auth = useAuth();
 
   useEffect(() => {
-    NotificationService.list().subscribe((x) => setNotifications(x));
-    NotificationService.count().subscribe((x) => setCount(x));
+    NotificationService.list().subscribe((x) => {
+      setNotifications(
+        x.filter((notification) => notification.recipient == auth.user?.id)
+      );
+      setCount(
+        x.filter((notification) => notification.recipient == auth.user?.id)
+          .length
+      );
+    });
   }, []);
 
   return (
