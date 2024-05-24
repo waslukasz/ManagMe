@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/navigation/Navigation";
 import Projects from "./components/projects/Projects";
-
 import "./index.css";
 import ProjectsCreate from "./components/projects/CreateProject";
 import Functionalities from "./components/functionalities/Functionalities";
